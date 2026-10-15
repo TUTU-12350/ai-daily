@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 每日资讯 · 手绘观察台</title>
+<style>
+:root{
+  --paper:#FBF6EC; --paper2:#F4EBDA; --paper3:#FFF8E8;
+  --ink:#2F2A24; --ink2:#5C5348; --ink3:#8A7F70;
+  --line:#D9CDB8;
+  --red:#C0503C; --red-bg:#FBE6E0;
+  --blue:#37627F; --blue-bg:#E2EDF3;
+  --green:#5E8A63; --green-bg:#E6F0E5;
+  --amber:#D9973B; --amber-bg:#FCEFD8;
+  --font-hand:"Kaiti SC","STKaiti","KaiTi","楷体","LXGW WenKai","楷体_GB2312",serif;
+  --font-body:"PingFang SC","Microsoft YaHei","微软雅黑","Hiragino Sans GB",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--font-body); color:var(--ink);
+  background-color:var(--paper);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(180deg,transparent 0 31px,rgba(176,150,110,.13) 31px 32px);
+  background-attachment:fixed;
+  min-height:100vh; line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+  transition:background-color .4s ease, color .4s ease, background-image .4s ease;
+}
+/* ---------- 手绘背景涂鸦层 ---------- */
+.doodle{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.doodle svg{position:absolute;opacity:.13;}
+.doodle .d1{top:-10px;left:-20px;width:300px;}
+.doodle .d2{top:40px;right:-30px;width:260px;}
+.doodle .d3{bottom:-20px;left:20px;width:280px;}
+.doodle .d4{bottom:60px;right:-10px;width:240px;}
+.doodle .d5{top:38%;left:-40px;width:180px;opacity:.09;}
+.doodle .d6{top:62%;right:-30px;width:200px;opacity:.09;}
+@media(max-width:1100px){.doodle .d5,.doodle .d6{display:none;}}
+
+/* ---------- 版式 ---------- */
+.wrap{position:relative;z-index:1;max-width:1420px;margin:0 auto;padding:0 24px 60px;}
+
+header.masthead{padding:34px 0 18px;position:relative;}
+.brand{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;}
+.logo-badge{
+  width:74px;height:74px;flex:0 0 74px;position:relative;
+  background:var(--paper3);border:2.5px solid var(--ink);
+  border-radius:26px 9px 24px 10px/10px 24px 9px 26px;
+  display:grid;place-items:center;transform:rotate(-3deg);
+  box-shadow:3px 4px 0 rgba(47,42,36,.10);
+  color:var(--red);
+}
+.logo-badge img{width:100%;height:100%;object-fit:contain;padding:5px;display:block;}
+h1.sitetitle{
+  font-family:var(--font-hand);font-size:46px;line-height:1.05;margin:0;
+  letter-spacing:1px;font-weight:700;
+}
+h1.sitetitle em{font-style:normal;color:var(--red);}
+.subtitle{margin:6px 0 0;color:var(--ink2);font-size:14px;letter-spacing:.5px;}
+.underline{display:block;width:min(560px,80%);height:14px;margin-top:4px;color:var(--red);}
+.datebar{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  margin-top:16px;padding:10px 16px;
+  background:rgba(255,248,232,.72);border:2px solid var(--ink);
+  border-radius:18px 6px 20px 7px/7px 20px 6px 18px;
+  width:fit-content;max-width:100%;
+}
+.datebar .d-main{font-family:var(--font-hand);font-size:20px;font-weight:700;}
+.datebar .d-sub{color:var(--ink2);font-size:13px;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ink3);}
+
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center;}
+button.btn, .btn{
+  font-family:var(--font-body);font-size:13px;cursor:pointer;
+  padding:8px 16px;color:var(--ink);background:var(--paper3);
+  border:2px solid var(--ink);
+  border-radius:16px 6px 18px 7px/7px 18px 6px 16px;
+  box-shadow:2px 3px 0 rgba(47,42,36,.12);
+  transition:transform .12s ease, box-shadow .12s ease, background .12s;
+}
+button.btn:hover{transform:translate(-1px,-2px);box-shadow:4px 5px 0 rgba(47,42,36,.16);background:#fff;}
+button.btn:active{transform:translate(1px,2px);box-shadow:1px 1px 0 rgba(47,42,36,.12);}
+button.btn.primary{background:var(--ink);color:var(--paper3);}
+button.btn.primary:hover{background:#443c33;}
+button.btn.danger{color:var(--red);border-color:var(--red);background:var(--red-bg);}
+button.btn.small{padding:5px 11px;font-size:12px;border-radius:12px 5px 14px 5px/5px 14px 5px 12px;}
+
+/* ---------- 三栏 ---------- */
+.layout{display:grid;grid-template-columns:246px minmax(0,1fr) 340px;gap:22px;margin-top:26px;align-items:start;}
+@media(max-width:1240px){.layout{grid-template-columns:210px minmax(0,1fr);} .col-right{grid-column:1/-1;}}
+@media(max-width:860px){.layout{grid-template-columns:1fr;} .col-left{grid-column:1/-1;}}
+
+.panel{
+  background:rgba(255,250,240,.86);
+  border:2px solid var(--ink);
+  border-radius:20px 7px 22px 8px/8px 22px 7px 20px;
+  padding:16px 16px 18px;
+  box-shadow:3px 4px 0 rgba(47,42,36,.07);
+  position:relative;
+}
+.panel + .panel{margin-top:18px;}
+.panel h3{
+  font-family:var(--font-hand);font-size:18px;margin:0 0 12px;
+  display:flex;align-items:center;gap:8px;letter-spacing:.5px;
+}
+.panel h3 .tag-num{
+  margin-left:auto;font-family:var(--font-body);font-size:11px;
+  background:var(--paper2);border:1.5px solid var(--line);border-radius:20px;padding:1px 9px;color:var(--ink2);
+}
+.col-left{position:sticky;top:18px;}
+@media(max-width:860px){.col-left{position:static;}}
+.col-right{position:sticky;top:18px;max-height:calc(100vh - 40px);overflow:auto;padding-right:4px;}
+@media(max-width:1240px){.col-right{position:static;max-height:none;overflow:visible;}}
+.col-right::-webkit-scrollbar{width:7px;}
+.col-right::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px;}
+
+/* 概览统计 */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stat{
+  background:var(--paper3);border:1.5px dashed var(--line);border-radius:12px;
+  padding:8px 10px;text-align:center;
+}
+.stat b{display:block;font-family:var(--font-hand);font-size:24px;line-height:1.2;}
+.stat span{font-size:11px;color:var(--ink2);}
+.stat.r b{color:var(--red);} .stat.b b{color:var(--blue);} .stat.g b{color:var(--green);}
+
+/* 分类筛选 */
+.filters{display:flex;flex-direction:column;gap:7px;}
+.filters button{
+  display:flex;align-items:center;gap:9px;text-align:left;width:100%;
+  padding:8px 12px;font-size:13px;cursor:pointer;font-family:var(--font-body);
+  background:var(--paper3);border:2px solid var(--ink);
+  border-radius:14px 5px 16px 6px/6px 16px 5px 14px;
+  transition:transform .12s,background .12s;
+}
+.filters button:hover{transform:translateX(3px);}
+.filters button.on{background:var(--ink);color:var(--paper3);}
+.filters button .swatch{width:12px;height:12px;border-radius:3px;flex:0 0 12px;border:1.5px solid rgba(0,0,0,.35);}
+.sw-all{background:var(--ink);} .sw-model{background:var(--red);} .sw-policy{background:var(--blue);} .sw-industry{background:var(--green);}
+.filters button .cnt{margin-left:auto;font-size:11px;opacity:.75;}
+
+/* 归档列表 */
+.arch-list{max-height:230px;overflow:auto;margin:-2px -4px 0;padding:0 4px;}
+.arch-item{
+  display:flex;align-items:center;gap:8px;padding:7px 8px;font-size:13px;cursor:pointer;
+  border-radius:10px;border:1.5px solid transparent;
+}
+.arch-item:hover{background:var(--paper2);border-color:var(--line);}
+.arch-item.on{background:var(--amber-bg);border-color:var(--amber);}
+.arch-item .ad{font-family:var(--font-hand);font-size:15px;}
+.arch-item .an{margin-left:auto;color:var(--ink2);font-size:11px;}
+.arch-item .del{opacity:0;color:var(--red);font-size:15px;line-height:1;padding:0 3px;cursor:pointer;}
+.arch-item:hover .del{opacity:1;}
+.empty{color:var(--ink3);font-size:12px;padding:6px 2px;}
+
+/* 已删除 */
+.trash-head{display:flex;align-items:center;cursor:pointer;font-size:13px;color:var(--ink2);}
+.trash-head b{color:var(--red);font-family:var(--font-hand);}
+.trash-body{margin-top:10px;display:none;}
+.trash-body.open{display:block;}
+.trash-row{display:flex;gap:8px;align-items:flex-start;font-size:12px;padding:6px 4px;border-bottom:1px dashed var(--line);}
+.trash-row .t{flex:1;color:var(--ink2);}
+.trash-row button{background:none;border:none;color:var(--blue);cursor:pointer;font-size:12px;text-decoration:underline;padding:0;}
+.trash-row button.purge{color:var(--red);}
+
+/* ---------- 中栏 ---------- */
+.feed-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+.feed-title{font-family:var(--font-hand);font-size:26px;margin:0;}
+.searchbox{flex:1;min-width:190px;position:relative;}
+.searchbox input{
+  width:100%;padding:9px 14px 9px 34px;font-size:13px;font-family:var(--font-body);
+  color:var(--ink);background:var(--paper3);
+  border:2px solid var(--ink);border-radius:18px 7px 20px 7px/7px 20px 7px 18px;outline:none;
+}
+.searchbox input:focus{background:#fff;}
+.searchbox .mag{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;opacity:.55;color:var(--ink2);}
+
+.cards{display:flex;flex-direction:column;gap:16px;}
+.card{
+  position:relative;background:rgba(255,251,242,.94);
+  border:2px solid var(--ink);
+  padding:16px 18px 14px;
+  box-shadow:4px 5px 0 rgba(47,42,36,.08);
+  transition:transform .16s ease, box-shadow .16s ease;
+  cursor:pointer;
+}
+.card:nth-child(4n+1){border-radius:22px 7px 24px 8px/8px 24px 7px 22px;transform:rotate(-.25deg);}
+.card:nth-child(4n+2){border-radius:8px 24px 9px 22px/22px 9px 24px 8px;transform:rotate(.2deg);}
+.card:nth-child(4n+3){border-radius:24px 9px 8px 22px/9px 22px 24px 9px;}
+.card:nth-child(4n+4){border-radius:9px 22px 24px 8px/24px 8px 9px 22px;transform:rotate(-.15deg);}
+.card:hover{box-shadow:6px 8px 0 rgba(47,42,36,.13);}
+.card.focus{outline:3px dashed var(--amber);outline-offset:5px;}
+.card.read{opacity:.62;}
+.card.read::after{
+  content:"已读";position:absolute;right:14px;top:12px;font-size:11px;color:var(--ink3);
+  border:1.5px solid var(--line);border-radius:20px;padding:0 8px;
+}
+.strip{position:absolute;left:0;top:14px;bottom:14px;width:5px;border-radius:0 6px 6px 0;}
+.cat-model .strip{background:var(--red);} .cat-policy .strip{background:var(--blue);} .cat-industry .strip{background:var(--green);}
+.card .meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-bottom:7px;}
+.pill{
+  font-size:11px;padding:1.5px 9px;border-radius:20px;border:1.5px solid;
+  font-weight:600;letter-spacing:.3px;
+}
+.pill.model{color:var(--red);border-color:var(--red);background:var(--red-bg);}
+.pill.policy{color:var(--blue);border-color:var(--blue);background:var(--blue-bg);}
+.pill.industry{color:var(--green);border-color:var(--green);background:var(--green-bg);}
+.card h2{
+  font-family:var(--font-hand);font-size:23px;line-height:1.4;margin:0 0 8px;font-weight:700;
+}
+.card .lead{font-size:14px;color:var(--ink2);margin:0 0 10px;line-height:1.85;}
+.card .lead b{color:var(--ink);font-weight:600;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;}
+.tags span{font-size:11px;color:var(--ink2);background:var(--paper2);border:1px dashed var(--line);border-radius:20px;padding:1px 9px;}
+.card .ops{display:flex;gap:8px;margin-top:12px;align-items:center;}
+.card .ops .src{margin-left:auto;font-size:11px;color:var(--ink3);}
+.icon-btn{
+  background:none;border:none;cursor:pointer;color:var(--ink2);font-size:12px;padding:3px 6px;border-radius:8px;
+}
+.icon-btn:hover{background:var(--paper2);color:var(--ink);}
+.icon-btn.del:hover{color:var(--red);background:var(--red-bg);}
+
+/* ---------- 右栏速览 ---------- */
+.focus-card{
+  background:var(--amber-bg);border:2px solid var(--amber);
+  border-radius:16px 6px 18px 7px/7px 18px 6px 16px;padding:14px 15px;position:relative;
+  box-shadow:3px 4px 0 rgba(217,151,59,.18);
+}
+.focus-card .pin{position:absolute;top:-9px;left:18px;width:16px;height:16px;}
+.focus-card h4{font-family:var(--font-hand);font-size:18px;margin:6px 0 8px;line-height:1.45;}
+.focus-card .sum{font-size:13.5px;line-height:1.85;color:#4a4034;}
+.wc{display:inline-block;font-size:10px;color:var(--ink3);border:1px dashed var(--line);border-radius:20px;padding:0 7px;}
+
+.snap{position:relative;padding:12px 13px;margin-bottom:12px;cursor:pointer;
+  background:var(--paper3);border:2px solid var(--ink);
+  transition:transform .14s, box-shadow .14s;
+}
+.snap:nth-child(odd){border-radius:15px 6px 17px 7px/7px 17px 6px 15px;}
+.snap:nth-child(even){border-radius:7px 17px 6px 15px/15px 6px 17px 7px;}
+.snap:hover{transform:translate(2px,-2px);box-shadow:4px 5px 0 rgba(47,42,36,.10);}
+.snap.on{background:#FFF3D6;border-color:var(--amber);}
+.snap .sn-top{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink2);margin-bottom:5px;}
+.snap .sn-t{font-family:var(--font-hand);font-size:15.5px;line-height:1.45;margin:0 0 5px;font-weight:700;}
+.snap .sn-s{font-size:12.5px;color:var(--ink2);line-height:1.8;margin:0;}
+
+.kw{display:flex;flex-wrap:wrap;gap:6px;}
+.kw span{font-size:11.5px;padding:2px 10px;border:1.5px solid var(--line);border-radius:20px;background:var(--paper3);color:var(--ink2);}
+.kw span.hot{background:var(--red-bg);border-color:var(--red);color:var(--red);}
+
+/* ---------- 详情抽屉 ---------- */
+.mask{position:fixed;inset:0;background:rgba(45,40,34,.42);z-index:50;display:none;backdrop-filter:blur(2px);}
+.mask.open{display:block;}
+.detail{
+  position:fixed;top:0;right:0;bottom:0;width:min(560px,94vw);z-index:51;
+  background:var(--paper);overflow:auto;transform:translateX(102%);
+  transition:transform .3s cubic-bezier(.22,.8,.3,1);
+  border-left:3px solid var(--ink);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='0.3'/%3E%3C/svg%3E"),repeating-linear-gradient(180deg,transparent 0 31px,rgba(176,150,110,.12) 31px 32px);
+}
+.detail.open{transform:translateX(0);}
+.detail-inner{padding:26px 28px 60px;}
+.close-x{
+  position:sticky;top:0;float:right;margin:-6px -6px 0 0;
+  width:36px;height:36px;border-radius:50%;border:2px solid var(--ink);background:var(--paper3);
+  cursor:pointer;font-size:17px;line-height:1;z-index:2;
+}
+.close-x:hover{background:var(--red);color:#fff;border-color:var(--red);}
+.d-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--ink2);margin-bottom:10px;}
+.d-title{font-family:var(--font-hand);font-size:31px;line-height:1.35;margin:0 0 14px;font-weight:700;}
+.d-sumbox{
+  background:var(--amber-bg);border:2px dashed var(--amber);
+  border-radius:14px 6px 16px 6px/6px 16px 6px 14px;padding:13px 15px;margin-bottom:18px;
+}
+.d-sumbox .lab{font-size:11px;letter-spacing:2px;color:var(--amber);font-weight:700;margin-bottom:5px;}
+.d-sumbox p{margin:0;font-size:14px;line-height:1.9;color:#4a4034;}
+.d-body p{font-size:14.5px;line-height:2;margin:0 0 14px;text-align:justify;}
+.d-body p:first-letter{font-family:var(--font-hand);font-size:22px;}
+.d-points{background:var(--paper3);border:2px solid var(--ink);border-radius:16px 6px 18px 7px/7px 18px 6px 16px;padding:14px 16px;margin:18px 0;}
+.d-points .lab{font-family:var(--font-hand);font-size:16px;margin-bottom:8px;}
+.d-points li{font-size:13.5px;line-height:1.85;margin-bottom:6px;color:var(--ink2);}
+.d-points li b{color:var(--ink);}
+.d-foot{margin-top:22px;padding-top:14px;border-top:1.5px dashed var(--line);display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.d-foot .srcnote{font-size:12px;color:var(--ink3);margin-left:auto;}
+
+/* toast */
+.toast{
+  position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);z-index:60;
+  background:var(--ink);color:var(--paper3);font-size:13px;padding:10px 20px;border-radius:24px;
+  opacity:0;pointer-events:none;transition:all .22s ease;
+}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+.notice{font-size:11.5px;color:var(--ink3);margin-top:10px;line-height:1.7;}
+button.btn.theme{display:inline-flex;align-items:center;gap:7px;}
+.arch-list::-webkit-scrollbar{width:6px;}
+.arch-list::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px;}
+
+/* ================= 科技风主题：冷色 · 简约 ================= */
+.techfx{
+  position:fixed;inset:0;pointer-events:none;z-index:0;display:none;
+  background-image:
+    radial-gradient(900px 520px at 10% 6%, rgba(86,124,255,.20), transparent 62%),
+    radial-gradient(760px 520px at 92% 20%, rgba(56,208,201,.14), transparent 64%),
+    radial-gradient(900px 640px at 62% 96%, rgba(140,120,255,.14), transparent 62%),
+    linear-gradient(transparent 0 39px, rgba(130,170,225,.07) 39px 40px),
+    linear-gradient(90deg, transparent 0 39px, rgba(130,170,225,.07) 39px 40px);
+}
+body[data-theme="tech"] .techfx{display:block;}
+body[data-theme="tech"] .doodle{display:none;}
+
+body[data-theme="tech"]{
+  --paper:#0A1120; --paper2:#0F182C; --paper3:#121E35;
+  --ink:#E8EFFA; --ink2:#A2B3CB; --ink3:#6D80A0;
+  --line:#25344F;
+  --red:#7C9CFF; --red-bg:rgba(124,156,255,.13);
+  --blue:#43D6C4; --blue-bg:rgba(67,214,196,.13);
+  --green:#9E8BFF; --green-bg:rgba(158,139,255,.13);
+  --amber:#43D6C4; --amber-bg:rgba(67,214,196,.09);
+  --font-hand:var(--font-body);
+  color-scheme:dark;
+  background-color:var(--paper);
+  background-image:none;
+}
+body[data-theme="tech"] .panel,
+body[data-theme="tech"] .card,
+body[data-theme="tech"] .snap,
+body[data-theme="tech"] .focus-card,
+body[data-theme="tech"] .datebar,
+body[data-theme="tech"] .d-points,
+body[data-theme="tech"] .d-sumbox,
+body[data-theme="tech"] .logo-badge{
+  border-radius:12px;border-width:1px;
+}
+body[data-theme="tech"] .panel{background:rgba(15,24,44,.72);backdrop-filter:blur(8px);box-shadow:0 14px 36px rgba(0,0,0,.34);}
+body[data-theme="tech"] .datebar{background:rgba(18,30,53,.78);box-shadow:none;}
+body[data-theme="tech"] .card{background:rgba(17,28,49,.80);transform:none;box-shadow:0 12px 32px rgba(0,0,0,.32);}
+body[data-theme="tech"] .card:hover{box-shadow:0 18px 42px rgba(0,0,0,.46),0 0 0 1px rgba(124,156,255,.38);}
+body[data-theme="tech"] .card.focus{outline:none;box-shadow:0 0 0 1.5px var(--amber),0 14px 34px rgba(0,0,0,.42);}
+body[data-theme="tech"] .card.read::after{border-style:solid;}
+body[data-theme="tech"] button.btn,
+body[data-theme="tech"] .filters button,
+body[data-theme="tech"] .searchbox input,
+body[data-theme="tech"] .stat,
+body[data-theme="tech"] .tags span,
+body[data-theme="tech"] .kw span,
+body[data-theme="tech"] .pill,
+body[data-theme="tech"] .wc{border-radius:9px;border-width:1px;}
+body[data-theme="tech"] button.btn{box-shadow:none;}
+body[data-theme="tech"] button.btn:hover{box-shadow:0 6px 18px rgba(0,0,0,.35);transform:translateY(-1px);}
+body[data-theme="tech"] button.btn:active{box-shadow:none;transform:none;}
+body[data-theme="tech"] .searchbox input:focus{background:rgba(23,38,64,.95);box-shadow:0 0 0 2px rgba(124,156,255,.28);}
+body[data-theme="tech"] .stat{border-style:solid;}
+body[data-theme="tech"] .tags span{border-style:solid;}
+body[data-theme="tech"] .trash-row{border-bottom-style:solid;}
+body[data-theme="tech"] .logo-badge{transform:none;box-shadow:0 8px 22px rgba(0,0,0,.4);}
+body[data-theme="tech"] .underline{display:none;}
+body[data-theme="tech"] h1.sitetitle{letter-spacing:2px;}
+body[data-theme="tech"] .feed-title,
+body[data-theme="tech"] .panel h3{letter-spacing:1px;}
+body[data-theme="tech"] .card h2,
+body[data-theme="tech"] .sn-t,
+body[data-theme="tech"] .d-title{letter-spacing:.4px;}
+body[data-theme="tech"] .snap{background:rgba(17,28,49,.72);}
+body[data-theme="tech"] .snap:hover{box-shadow:0 12px 28px rgba(0,0,0,.42);}
+body[data-theme="tech"] .snap.on{background:rgba(67,214,196,.10);border-color:var(--amber);}
+body[data-theme="tech"] .focus-card{
+  background:rgba(67,214,196,.09);border-color:rgba(67,214,196,.45);
+  box-shadow:0 0 0 1px rgba(67,214,196,.16),0 14px 34px rgba(0,0,0,.34);
+}
+body[data-theme="tech"] .focus-card .sum{color:#D3E7E4;}
+body[data-theme="tech"] .focus-card .pin circle{fill:var(--amber);stroke:var(--amber);}
+body[data-theme="tech"] .focus-card .pin path{stroke:var(--amber);}
+body[data-theme="tech"] .strip{border-radius:0 3px 3px 0;}
+body[data-theme="tech"] .arch-item:hover{background:var(--paper2);}
+body[data-theme="tech"] .arch-item.on{background:rgba(67,214,196,.12);border-color:var(--amber);}
+body[data-theme="tech"] .col-right::-webkit-scrollbar-thumb,
+body[data-theme="tech"] .arch-list::-webkit-scrollbar-thumb{background:#26374F;}
+body[data-theme="tech"] .close-x{border-radius:50%;}
+body[data-theme="tech"] .close-x:hover{color:#0A1120;}
+body[data-theme="tech"] .mask{background:rgba(4,9,20,.7);}
+body[data-theme="tech"] .detail{
+  background-color:#0A1120;background-image:none;
+  border-left:1px solid var(--line);box-shadow:-26px 0 60px rgba(0,0,0,.5);
+}
+body[data-theme="tech"] .d-body p:first-letter{font-family:var(--font-body);font-size:14.5px;}
+body[data-theme="tech"] .toast{background:#16233D;border:1px solid var(--line);}
+/* 科技风下保留「危险操作」的警示色，避免与冷色主色混淆 */
+body[data-theme="tech"] button.btn.danger{color:#FF8A94;border-color:rgba(255,138,148,.5);background:rgba(255,138,148,.10);}
+body[data-theme="tech"] .icon-btn.del:hover{color:#FF8A94;background:rgba(255,138,148,.12);}
+body[data-theme="tech"] .trash-row button.purge,
+body[data-theme="tech"] .arch-item .del,
+body[data-theme="tech"] .trash-head b{color:#FF8A94;}
+</style>
+</head>
+<body data-theme="ink">
+
+<!-- 科技风背景：网格 + 冷色光晕 -->
+<div class="techfx" aria-hidden="true"></div>
+
+<!-- 手绘背景涂鸦 -->
+<div class="doodle" aria-hidden="true">
+  <svg class="d1" viewBox="0 0 300 300" fill="none" stroke="#2F2A24" stroke-width="2" stroke-linecap="round">
+    <path d="M60 120a40 40 0 0 1 80 0c0 18-12 26-12 40a8 8 0 0 0 16 0c0-14-12-22-12-40a40 40 0 0 1-80 0z"/>
+    <path d="M100 175v14M92 196h16M78 186l-14 8M122 186l14 8M100 118h0"/>
+    <path d="M40 60l12-10M40 72l14-6M36 86l14 2M160 60l-12-10M160 72l-14-6M164 86l-14 2"/>
+    <circle cx="200" cy="210" r="26"/><path d="M200 190v-12M200 230v12M180 210h-12M220 210h12M212 202l9-9M188 218l-9 9"/>
+  </svg>
+  <svg class="d2" viewBox="0 0 260 260" fill="none" stroke="#2F2A24" stroke-width="2" stroke-linecap="round">
+    <rect x="80" y="80" width="100" height="100" rx="8"/><rect x="100" y="100" width="60" height="60" rx="5"/>
+    <path d="M80 105H40M80 125H50M80 145H40M180 105h40M180 125h30M180 145h40M105 80V40M125 80V50M145 80V40M105 180v40M125 180v30M145 180v40"/>
+    <circle cx="40" cy="105" r="4" fill="#2F2A24"/><circle cx="220" cy="105" r="4" fill="#2F2A24"/>
+  </svg>
+  <svg class="d3" viewBox="0 0 280 280" fill="none" stroke="#2F2A24" stroke-width="2" stroke-linecap="round">
+    <circle cx="100" cy="180" r="52"/><circle cx="100" cy="180" r="24"/>
+    <path d="M100 128v-18M152 180h18M100 232v18M48 180H30M126 154l14-14M126 206l14 14M74 206l-14 14M74 154l-14-14"/>
+    <path d="M180 90c14-16 40-12 44 6s-16 30-32 26-24-26-8-34"/>
+    <path d="M196 74l6-14 14-6"/>
+  </svg>
+  <svg class="d4" viewBox="0 0 240 240" fill="none" stroke="#2F2A24" stroke-width="2" stroke-linecap="round">
+    <path d="M40 60h150a12 12 0 0 1 12 12v70a12 12 0 0 1-12 12H95L60 176v-22H40a12 12 0 0 1-12-12V72a12 12 0 0 1 12-12z"/>
+    <path d="M70 90h100M70 112h76M70 134h50"/>
+    <path d="M176 40l4 12 12 4-12 4-4 12-4-12-12-4 12-4z"/>
+  </svg>
+  <svg class="d5" viewBox="0 0 180 180" fill="none" stroke="#2F2A24" stroke-width="2.4" stroke-linecap="round">
+    <path d="M8 20c22 6 30-8 44-8s22 14 44 14 30-14 44-14"/>
+    <path d="M8 60c22 6 30-8 44-8s22 14 44 14 30-14 44-14"/>
+    <path d="M8 100c22 6 30-8 44-8s22 14 44 14 30-14 44-14"/>
+  </svg>
+  <svg class="d6" viewBox="0 0 200 200" fill="none" stroke="#2F2A24" stroke-width="2" stroke-linecap="round">
+    <circle cx="40" cy="40" r="9"/><circle cx="150" cy="30" r="7"/><circle cx="170" cy="120" r="10"/><circle cx="60" cy="150" r="8"/>
+    <path d="M49 40h94M157 37l-10 76M170 110L68 143M68 142L48 47M60 150l103-27"/>
+  </svg>
+</div>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="brand">
+      <div class="logo-badge" id="logoBadge"></div>
+      <div>
+        <h1 class="sitetitle">AI 每日<em>资讯</em>观察台</h1>
+        <p class="subtitle">每日追踪 · 前沿模型 / 政策法规 / 行业动态 —— 一屏看懂今天的 AI 世界</p>
+        <svg class="underline" viewBox="0 0 560 14" fill="none" preserveAspectRatio="none">
+          <path d="M4 9c60-6 130 4 196-2s130 6 196 0 130-4 160 1" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <path d="M20 13c90-4 150 3 240-1s150 5 240 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".45"/>
+        </svg>
+      </div>
+    </div>
+    <div class="datebar">
+      <span class="d-main" id="dateMain">—</span>
+      <span class="dot"></span>
+      <span class="d-sub" id="dateSub">—</span>
+      <span class="dot"></span>
+      <span class="d-sub" id="feedCount">—</span>
+    </div>
+    <div class="toolbar">
+      <button class="btn primary" id="btnRefresh">更新今日资讯</button>
+      <button class="btn" id="btnShuffle">换一批</button>
+      <button class="btn" id="btnMarkAll">全部标为已读</button>
+      <button class="btn danger" id="btnClear">清空归档</button>
+      <button class="btn theme" id="btnTheme" title="切换页面风格">
+        <svg id="themeIcon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>
+          <circle cx="12" cy="12" r="4"/>
+        </svg>
+        <span id="themeLabel">切换：科技风</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- 左栏 -->
+    <div class="col-left">
+      <section class="panel">
+        <h3>今日概览<span class="tag-num" id="overviewTag">—</span></h3>
+        <div class="stats">
+          <div class="stat r"><b id="cModel">0</b><span>模型发布</span></div>
+          <div class="stat b"><b id="cPolicy">0</b><span>政策法规</span></div>
+          <div class="stat g"><b id="cIndustry">0</b><span>行业动态</span></div>
+          <div class="stat"><b id="cTotal">0</b><span>今日条数</span></div>
+        </div>
+        <div class="notice">资讯库共 <b id="poolSize">0</b> 条，按日轮转抽取；每日首次打开自动生成当日简报。</div>
+      </section>
+
+      <section class="panel">
+        <h3>分类筛选</h3>
+        <div class="filters" id="filters">
+          <button data-cat="all" class="on"><span class="swatch sw-all"></span>全部资讯<span class="cnt" id="fAll">0</span></button>
+          <button data-cat="model"><span class="swatch sw-model"></span>最新模型<span class="cnt" id="fModel">0</span></button>
+          <button data-cat="policy"><span class="swatch sw-policy"></span>AI 政策<span class="cnt" id="fPolicy">0</span></button>
+          <button data-cat="industry"><span class="swatch sw-industry"></span>行业新闻<span class="cnt" id="fIndustry">0</span></button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>往期归档<span class="tag-num" id="archCount">0 天</span></h3>
+        <div class="arch-list" id="archList"></div>
+      </section>
+
+      <section class="panel">
+        <div class="trash-head" id="trashHead">
+          <b>已删除</b>&nbsp;<span id="trashN">0</span> 条 · 点击展开
+        </div>
+        <div class="trash-body" id="trashBody">
+          <div id="trashList"></div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn small" id="btnRestore">全部恢复</button>
+            <button class="btn small danger" id="btnPurge">彻底清空</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 中栏 -->
+    <div class="col-mid">
+      <div class="feed-head">
+        <h2 class="feed-title" id="feedTitle">今日资讯</h2>
+        <div class="searchbox">
+          <svg class="mag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21" stroke-linecap="round"/></svg>
+          <input id="search" type="text" placeholder="搜索标题、摘要或关键词…">
+        </div>
+      </div>
+      <div class="cards" id="cards"></div>
+      <div class="empty" id="noResult" style="display:none;padding:24px 4px;">没有匹配的资讯，换个关键词试试。</div>
+    </div>
+
+    <!-- 右栏 -->
+    <div class="col-right">
+      <section class="panel">
+        <h3>当前速览<span class="tag-num">100 字以内</span></h3>
+        <div class="focus-card" id="focusCard">
+          <svg class="pin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="5.5" fill="#C0503C" stroke="#2F2A24" stroke-width="1.6"/><path d="M12 14.5V22" stroke="#2F2A24" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <div class="sn-top"><span id="fcCat">—</span></div>
+          <h4 id="fcTitle">从左侧点开任意一条资讯，这里会显示它的核心速览</h4>
+          <p class="sum" id="fcSum">右侧栏是「速览区」：每条资讯都用 100 字以内提炼核心结论，滚动列表时会自动跟随当前视线内的资讯切换。</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>全天速览<span class="tag-num" id="snapCount">0 条</span></h3>
+        <div id="snapList"></div>
+      </section>
+
+      <section class="panel">
+        <h3>今日关键词</h3>
+        <div class="kw" id="kwList"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="mask"></div>
+<aside class="detail" id="detail"><div class="detail-inner" id="detailInner"></div></aside>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== 资讯库 ===================== */
+const POOL = [
+/* ---------- 模型发布 ---------- */
+{id:'m01',cat:'model',date:'2026-10-08',source:'OpenAI 官方 / IT时代网',region:'海外',
+title:'GPT-6 全量推送 ChatGPT：Sol 与 Luna 双版本分档上线',
+summary:'OpenAI 于 10 月 8 日向 ChatGPT 全量推送 GPT-6。付费档由 GPT-6 Sol 驱动，免费档切换至 GPT-6 Luna，同步带来可混排图形、按钮、表单与图表的智能界面。',
+body:['OpenAI 完成 GPT-6 在 ChatGPT 的全量推送：Plus、Pro、Business 与 Enterprise 用户自 10 月 7 日起由 GPT-6 Sol 驱动，Free 与 Go 用户在 10 月 8 日切换到 GPT-6 Luna。这是 GPT-6 首次面向十亿级周活用户开放，也是 OpenAI 产品线今年最大的一次切换。','真正的体感变化在响应速度。GPT-6 可以在推理尚未结束时就开始作答，搜索类回答的起始时间提前约 44%。配套的 Ultrafast 版本已于 10 月 9 日上线，GPT-6.1 Sol 的默认上下文也提升至 500k。','界面层面，GPT-6 引入「智能界面」能力，模型可根据对话直接在回复中生成图形、按钮、表单与图表，把对话窗口从纯文本推向可交互的应用形态。'],
+points:['分档策略：Sol 面向高阶推理，Luna 面向日常与搜索','响应提速：不等推理结束即开始输出，搜索首字提前 44%','交互升级：回复内可混排按钮、表单与图表'],
+tags:['GPT-6','OpenAI','智能界面','上下文500k']},
+
+{id:'m02',cat:'model',date:'2026-10-07',source:'Anthropic 模型卡',region:'海外',
+title:'Claude Haiku 5.5 发布：运行成本较上代下降约 75%',
+summary:'Anthropic 推出小模型 Claude Haiku 5.5，主打高吞吐与成本敏感型负载，平均运行成本比 Haiku 4.5 低约 75%，并支持可调推理强度，适合摘要、检索与客服子智能体。',
+body:['Anthropic 于 10 月 7 日发布 Claude Haiku 5.5，定位为最快、最便宜的小模型档位。官方模型卡显示其平均运行成本比 Haiku 4.5 低约 75%，同时提供可调的推理强度档位，让开发者在速度与质量之间自行取点。','安全维度上，Haiku 5.5 的模型卡未触发 CB-2 与 Autonomy-2 阈值，灾难性错位风险评级为低。对需要把小模型铺到大规模子任务的企业来说，这意味着可以在有人类复核的前提下放心放量。','这是近一个月内 Claude 5.5 系列的第三次更新，节奏明显加快。小模型成本的快速下探，正在把「智能体拆分」从架构实验变成可算账的工程选择。'],
+points:['成本：较 Haiku 4.5 下降约 75%','能力：可调推理强度，适配子智能体','安全：未越过 CB-2 / Autonomy-2 阈值'],
+tags:['Claude','Haiku 5.5','推理成本','模型卡']},
+
+{id:'m03',cat:'model',date:'2026-10-12',source:'Meta Superintelligence Labs',region:'海外',
+title:'Meta 发布首款前沿级模型 Muse Wonder，主打「主动记忆」',
+summary:'Meta 发布 Muse Wonder 与 Full 版，内测成绩与 GPT-6 Astra 处于同一水平，主打「主动记忆」，闭源付费，基础版每百万 token 最低 0.2 美元。',
+body:['Meta 超级智能实验室于 10 月 12 日至 13 日发布 Muse Wonder 与 Muse Wonder Full，这是 Meta 首次明确对标「前沿模型」的产品。公开信息称其在部分技术基准上表现优于 Claude Opus 5.5 与 GPT-6 Astra，可用于从「理解租约」到「解读财务或健康信息」这类复杂任务。','差异点被放在「主动记忆」与主动专注上——直指智能体执行长周期任务时的记忆痛点。扎克伯格表示 Meta「已经在着手开发更高阶的产品」，模型开发节奏从现在起可能明显提速。','商业模式为闭源付费：基础版每百万 token 低至 0.2 美元，高级版 Muse Wonder Full 最高每月 200 美元。Meta 由此结束了在顶级模型竞赛中的观望姿态。'],
+points:['定位：Meta 首款前沿级模型，对标 GPT-6 Astra','卖点：主动记忆，服务长周期智能体任务','定价：基础版 0.2 美元/百万 token，Full 版月费上限 200 美元'],
+tags:['Meta','Muse Wonder','主动记忆','前沿模型']},
+
+{id:'m04',cat:'model',date:'2026-10-06',source:'Mistral AI / Unite.AI',region:'海外',
+title:'Mistral Large 4 开放 API 预览：1.05 万亿参数 MoE、百万上下文',
+summary:'Mistral 发布 Large 4（Le Chonk），1.05 万亿总参数、每 token 激活 490 亿的原生多模态 MoE，支持百万上下文，权重 10 月底开放。',
+body:['法国 Mistral AI 于 10 月 6 日推出 Mistral Large 4（代号 Le Chonk），以 API 公开预览形式上线。模型为原生多模态 MoE 架构，总参数约 1.05 万亿，每 token 激活约 490 亿，上下文长度达到 100 万 token，训练语料覆盖超过 160 种自然语言。','对自部署团队而言，权重开放时间是关键变量：官方承诺可下载权重要到 10 月底才放出，在此之前想做本地化部署的买家只能等待或选择其他方案。','万亿级参数配 MoE 稀疏激活，是当前兼顾规模与推理成本的主流路线。Mistral 以开放权重作为差异化，与 OpenAI、Meta 的闭源路线形成对照。'],
+points:['架构：1.05T 总参数 / 49B 激活的多模态 MoE','上下文：100 万 token','开放：权重预计 10 月底可下载，覆盖 160+ 语种'],
+tags:['Mistral','MoE','开放权重','多模态']},
+
+{id:'m05',cat:'model',date:'2026-10-01',source:'Google DeepMind',region:'海外',
+title:'Gemini 4 Argon 发布：输出上限提升至 100 万 token',
+summary:'谷歌发布旗舰 Gemini 4 Argon，输出上限由 6.4 万提升至 100 万 token，DeepSWE v1.1 得 77.9%，10 月 14 日登陆 Gemini 应用。',
+body:['谷歌于 10 月 1 日发布新一代旗舰模型 Gemini 4 Argon。最直观的变化是输出 token 上限从上一代的 6.4 万提升到 100 万，意味着单次生成可以承载完整的代码库、长篇报告或整本书级别的内容。','工程能力方面，DeepSWE v1.1 得分 77.9%。10 月 14 日该模型进一步登陆 Gemini 应用，面向 AI Pro 与 AI Ultra 订阅用户开放，Antigravity 智能体编程界面同步内置进 macOS 客户端。','长输出能力正在成为旗舰模型新的竞争维度：当上下文不再是瓶颈，模型能否一次性交付完整成果，直接决定了它在智能体场景里的可用性。'],
+points:['输出：单次上限 6.4 万 → 100 万 token','编程：DeepSWE v1.1 得分 77.9%','落地：10/14 上线 Gemini 应用，含 macOS 智能体编程界面'],
+tags:['Gemini','Google','长输出','智能体编程']},
+
+{id:'m06',cat:'model',date:'2026-10-13',source:'面壁智能',region:'国内',
+title:'MiniCPM-V 4.7 端侧多模态发布，iPhone 上 3GB 内存跑出 13 token/s',
+summary:'面壁推出端侧多模态 MiniCPM-V 4.7，35B-A3B 为系列首个 MoE 版本，iPhone 17 Pro Max 上以 3GB 内存跑出 13 token/s 以上。',
+body:['面壁智能于 10 月 13 日推出端侧多模态大模型 MiniCPM-V 4.7。该系列的 35B-A3B 版本是首个采用 MoE 架构的成员，在保持多模态理解能力的同时显著压缩了推理时的资源占用。','实测数据：在 iPhone 17 Pro Max 上以仅 3GB 内存实现每秒 13 个 token 以上的解码速度。这一指标让「手机本地跑多模态」从演示走向可用，尤其利好离线、隐私敏感与弱网场景。','端侧能力的抬升与国内模型整体的成本路线一致——竞争焦点正从参数规模转向推理效率与落地成本。'],
+points:['架构：35B-A3B，系列首个 MoE 版本','性能：iPhone 17 Pro Max 上 3GB 内存跑 13+ token/s','意义：端侧多模态从演示走向可用'],
+tags:['面壁智能','端侧模型','MoE','多模态']},
+
+{id:'m07',cat:'model',date:'2026-10-14',source:'野村证券 / 财经媒体',region:'国内',
+title:'Kimi K3.1 发布窗口临近，K4 传闻参数达 5 至 6 万亿',
+summary:'野村证券消息称月之暗面 Kimi K3.1 计划于 10 月中旬前发布，重点提升智能体长时间连续执行任务的能力；团队同时训练参数量预计达 5 到 6 万亿的更大规模模型 K4。',
+body:['月之暗面旗舰模型的升级窗口逐渐清晰。据野村证券方面消息，Kimi K3.1 计划于 10 月中旬前发布，重点提升智能体连续执行长时间任务的能力——这正是当前 Agent 产品落地时最容易崩掉的一环。','更大规模的后继型号 K4 也在训练中，参数量预计达到 5 到 6 万亿。若成真，将把国内模型的规模上限再推一个台阶。','同期月之暗面已完成 IPO 前最后一轮私募融资，估值约 500 亿美元，计划明年一季度在港交所上市。技术迭代与资本节奏正在同时加速。'],
+points:['K3.1：聚焦智能体长时间连续执行','K4：训练中，参数预计 5–6 万亿','资本：IPO 前私募完成，估值约 500 亿美元'],
+tags:['Kimi','月之暗面','智能体','K4']},
+
+{id:'m08',cat:'model',date:'2026-10-09',source:'阿里云百炼',region:'国内',
+title:'通义 Qwen-Image-2.1 系列上线：生成与编辑一体化',
+summary:'阿里云百炼新增 Qwen-Image-2.1 图像生成模型系列，Pro 版为统一的文生图与编辑模型，视觉生成组件仅 70 亿参数；Turbo 主打低步数去噪，支持原生透明生成与编辑一体化。',
+body:['阿里在 10 月 2 日至 9 日期间于百炼平台新增 Qwen-Image-2.1 图像生成模型系列。其中 Qwen-Image-2.1-Pro 是统一的文本到图像生成与编辑模型，视觉生成组件仅 70 亿参数。','Turbo 版本主打低步数去噪与性价比，支持原生透明生成，并把生成与编辑整合进同一条链路，减少在多个模型之间来回切换的损耗。','小参数高画质是这一轮图像模型的共同方向：把生成成本压到可批量调用的水平，才能真正进入电商、内容生产等高频场景。'],
+points:['Pro：统一文生图与编辑，视觉组件 7B 参数','Turbo：低步数去噪，支持原生透明生成','场景：面向电商与内容批量生产'],
+tags:['通义千问','文生图','图像编辑','阿里云']},
+
+{id:'m09',cat:'model',date:'2026-10-14',source:'xAI',region:'海外',
+title:'xAI 发布 Grok Voice 3.0，语音旗舰再迭代',
+summary:'xAI 于 10 月 14 日发布 Grok Voice 3.0，作为其语音旗舰模型的最新版本上线，延续了 xAI 在实时语音交互方向上的高频迭代节奏。',
+body:['xAI 于 10 月 14 日发布 Grok Voice 3.0，被列入本月最新的旗舰级模型发布序列。至此，10 月上半月的主要实验室几乎都完成了新一轮模型更新。','语音赛道本月同样拥挤：微软在 10 月 1 日发布 MAI-Transcribe-2-Streaming，支持 60 种语言的实时转录；语音正成为模型能力中迭代最快的一层。','语音能力的成熟直接降低了语音智能体的接入门槛——延迟与语种覆盖是当前最影响体验的两个硬指标。'],
+points:['发布：xAI 10 月 14 日上线语音旗舰','同月对照：微软 60 语种实时转录已发布','趋势：语音成为迭代最快的能力层'],
+tags:['xAI','Grok','语音模型','实时交互']},
+
+{id:'m10',cat:'model',date:'2026-10-15',source:'阶跃星辰',region:'国内',
+title:'Step 5 开源完整权重，此前已上线 WorkBuddy 限免',
+summary:'阶跃星辰 Step 5 模型进入落地阶段：10 月 12 日上线腾讯 WorkBuddy 并开启限免，10 月 15 日正式开源完整权重，延续国内开源深耕的路线。',
+body:['阶跃 Step 5 于 9 月发布，10 月进入密集落地期：12 日上线腾讯 WorkBuddy 并开启限时免费，15 日正式开源完整权重。','国内厂商近两个月走的是另一条路——开源加场景深耕。小米公开 RL 环境、阶跃放出完整权重、紫东太初公开数据管线，公开的不只是权重，还有训练方法论。','成本效率正在成为核心竞争维度：公开信息称 Step 5 的使用成本约为 Claude Opus 5 的八分之一，小米单任务成本不到 1 元。轻量化与低成本已成行业共识。'],
+points:['开源：10 月 15 日放出完整权重','落地：10 月 12 日上线 WorkBuddy 限免','成本：约为 Claude Opus 5 的 1/8'],
+tags:['阶跃星辰','Step 5','开源权重','成本效率']},
+
+{id:'m11',cat:'model',date:'2026-10-10',source:'Google DeepMind / 《科学》',region:'海外',
+title:'AlphaProof Nexus 解决 9 个悬置厄多斯问题，成果登《科学》',
+summary:'谷歌 DeepMind 的 AlphaProof Nexus 框架在测试中解决了 9 个此前未解的厄多斯问题，其中两个悬置超过 50 年，另解决 44 个开放数学猜想，成果发表于《科学》杂志。',
+body:['谷歌深度思维团队的 AlphaProof Nexus 框架在测试中解决了 9 个此前未解决的厄多斯问题，其中两个悬置时间超过 50 年，同时解决 44 个开放数学猜想，相关成果发表于《科学》杂志。','同期 OpenAI 公布了包含 722 份手稿、涵盖 372 个结果族的文件，披露某款未发布前沿模型解决的数百个长期悬置数学难题；其中一项普通成果所耗算力约相当于 ChatGPT Pro 连续思考三小时。','数学是检验推理能力的硬指标。当模型开始产出可被同行评议的新结论，AI 在科研中的角色正从「辅助工具」转向「共同作者」。'],
+points:['成果：9 个厄多斯问题 + 44 个开放猜想','发表：《科学》杂志','同期：OpenAI 披露 722 份数学手稿'],
+tags:['DeepMind','AlphaProof','数学推理','科研']},
+
+{id:'m12',cat:'model',date:'2026-10-03',source:'Aleph Alpha',region:'海外',
+title:'Aleph Alpha 发布 Kolibri：面向德英语境的政务与工业模型',
+summary:'Aleph Alpha 于 10 月 3 日推出 Kolibri，面向德语与英语的政府与工业场景，全程在欧洲开发训练，训练来源可追溯，可部署在客户自控基础设施上。',
+body:['Aleph Alpha 于 10 月 3 日发布 Kolibri，面向德语—英语的政府与工业客户。模型的开发与训练全程在欧洲完成，训练来源有文档化记录，可部署在客户自控的基础设施之上。','这种配置直接对应了监管敏感行业的核心诉求：数据与运维必须留在自己手里。对政府机构与受监管企业而言，可追溯性往往比跑分更重要。','主权 AI 正在成为欧洲市场的一条独立赛道，与中美的前沿模型竞赛形成第三条路径。'],
+points:['语种：德语—英语双语定位','合规：训练来源可追溯，欧洲本地训练','部署：支持客户自控基础设施'],
+tags:['Aleph Alpha','主权AI','政务','可追溯']},
+
+{id:'m13',cat:'model',date:'2026-10-01',source:'Microsoft Foundry',region:'海外',
+title:'微软发布 MAI-Transcribe-2-Streaming，覆盖 60 种语言实时转录',
+summary:'微软在 Foundry 平台发布 MAI-Transcribe-2-Streaming，支持 60 种语言实时转录，可显著降低语音智能体的字幕与听写延迟。',
+body:['微软于 10 月 1 日在 Foundry 平台发布 MAI-Transcribe-2-Streaming，与 MAI-Voice-2.1 和 Flash 版本一同上线。官方称其可处理 60 种语言的实时转录。','对语音智能体开发者来说，价值在于降低实时字幕与听写的端到端延迟——这是决定语音交互是否「像人」的关键体验指标。','转录一直是语音链路里最容易被低估的一环：识别慢半秒，整个对话的自然度就会塌掉。'],
+points:['能力：60 种语言实时转录','平台：Microsoft Foundry','价值：降低语音智能体端到端延迟'],
+tags:['微软','语音转录','Foundry','实时']},
+
+/* ---------- 政策法规 ---------- */
+{id:'p01',cat:'policy',date:'2026-09-17',source:'中央网信办 / 央广网',region:'国内',
+title:'《人工智能安全治理框架》3.0 发布，治理视角扩展到全链条',
+summary:'2026 年国家网络安全宣传周期间发布《人工智能安全治理框架》3.0，治理视角从单一技术环节拓展到数据、算法、模型、应用、供应链全过程，更强调风险分类分级与措施匹配。',
+body:['2026 年国家网络安全宣传周期间，《人工智能安全治理框架》3.0 对外发布。新框架延续发展与安全并重的思路，把治理视角从单一技术环节，拓展到数据、算法、模型、应用、供应链等全过程。','相比此前版本，3.0 更强调风险的分类分级，更强调治理措施与风险等级相匹配，也更强调可操作、可落地。治理手段上强调技术与管理「两条腿走路」：一方面推动安全检测评估、内容识别、可追溯等能力建设；另一方面压实主体责任，完善内部管理制度和应急处置机制。','业内专家同时指出两个待补短板：一是针对训练数据污染、开源组件后门、安全护栏能力的常态化专业测评亟待补齐；二是数据安全与个人信息保护等交叉领域的跨域协同治理有待加强。'],
+points:['范围：数据—算法—模型—应用—供应链全覆盖','方法：风险分类分级，措施与等级匹配','机制：政府监管、企业主责、行业自律、社会监督、国际合作相衔接'],
+tags:['安全治理','分类分级','供应链','网信办']},
+
+{id:'p02',cat:'policy',date:'2026-09-01',source:'最高人民法院',region:'国内',
+title:'最高法明确涉 AI 人格侵权裁判规则：肖像与声音权益双覆盖',
+summary:'2026 年 9 月最高人民法院发布《关于依法审理涉人工智能纠纷案件的意见》，明确未经同意用 AI 处理他人肖像、姓名生成可识别虚拟形象并商用构成肖像权侵权；未经授权模仿音色带货构成声音权益侵权。',
+body:['2026 年 9 月，最高人民法院发布《关于依法审理涉人工智能纠纷案件的意见》。意见明确：未经同意利用 AI 技术处理他人肖像、姓名，生成可识别的虚拟形象并商用传播，构成肖像权侵权；未经授权模仿他人音色、合成人声用于带货引流，构成声音权益侵权。','这为冒用网红、博主肖像带货一类案件提供了统一的司法标尺。此前各地裁判尺度不一，权利人维权成本高、结果不确定。','在顶层立法上，《国务院 2026 年度立法工作计划》已明确提出完善人工智能治理、加快推进人工智能健康发展综合性立法，全国人大常委会正加强该领域立法研究。'],
+points:['肖像：AI 生成可识别虚拟形象并商用即侵权','声音：模仿音色合成人声带货构成声音权益侵权','立法：综合性人工智能法正在加快推进'],
+tags:['最高法','肖像权','声音权益','AI换脸']},
+
+{id:'p03',cat:'policy',date:'2026-09-01',source:'国家网信办等',region:'国内',
+title:'《人工智能生成合成内容标识办法》生效，AI 内容须标注合成属性',
+summary:'自 2025 年 9 月 1 日起施行的《人工智能生成合成内容标识办法》要求网络信息服务提供者对可能造成公众混淆的 AI 生成合成内容标注合成属性，防范虚假信息以假乱真。',
+body:['《人工智能生成合成内容标识办法》自 2025 年 9 月 1 日起施行，要求网络信息服务提供者对可能造成公众混淆的 AI 生成合成内容标注合成属性，防范虚假信息以假乱真、误导公众。','与之配套的还有《互联网信息服务深度合成管理规定》与《生成式人工智能服务管理暂行办法》，明确禁止未经授权利用他人肖像、声纹数据开展 AI 训练和商业创作，并压实平台的审核、溯源与风险处置责任。','此外，多项生成式人工智能相关的网络安全国家标准于 11 月 1 日实施，涵盖预训练和优化训练数据安全规范、服务安全基本要求、数据标注安全规范等。'],
+points:['义务：AI 生成内容须标注合成属性','配套：深度合成规定 + 生成式服务暂行办法','国标：多项安全规范 11 月 1 日实施'],
+tags:['内容标识','深度合成','国家标准','平台责任']},
+
+{id:'p04',cat:'policy',date:'2026-07-15',source:'国家网信办',region:'国内',
+title:'《人工智能拟人化互动服务管理暂行办法》7 月 15 日施行',
+summary:'《人工智能拟人化互动服务管理暂行办法》已于 2026 年 7 月 15 日施行，与内容标识办法、网络安全法修改共同构成 2026 年密集落地的 AI 法规群。',
+body:['《人工智能拟人化互动服务管理暂行办法》已于 2026 年 7 月 15 日施行。2026 年以来，多部与人工智能相关的法规密集落地，形成分领域先行、敏捷回应的立法节奏。','时间线上：2025 年 10 月 28 日全国人大常委会通过修改网络安全法的决定，明确支持人工智能发展的措施和安全规定；修改后的网络安全法第二十条规定国家支持 AI 基础理论研究和算法等关键技术研发，推进训练数据资源、算力等基础设施建设。','中国社会科学院法学研究所专家指出，我国走的是「先探索分领域立法、待条件成熟后制定统一人工智能法」的路径，如今立法条件正在成熟。'],
+points:['施行：拟人化互动服务管理办法 7 月 15 日生效','底座：网络安全法第二十条明确支持 AI 发展','路径：分领域先行，统一立法条件成熟中'],
+tags:['拟人化互动','网络安全法','分领域立法','监管']},
+
+{id:'p05',cat:'policy',date:'2026-06-30',source:'国家网信办通报',region:'国内',
+title:'生成式 AI 备案数达 988 款，监管范围从大模型延伸至智能体',
+summary:'截至 2026 年 6 月 30 日，累计 988 款生成式人工智能服务完成备案、598 款应用或功能完成登记；监管范围已从大模型延伸至智能体，出台《智能体规范应用与创新发展实施意见》。',
+body:['截至 2026 年 6 月 30 日，累计有 988 款生成式人工智能服务完成备案，598 款应用或功能完成登记。这一数字反映了国内生成式 AI 服务的规模化程度。','监管范围也在同步扩容：从 2023 年的《生成式人工智能服务管理暂行办法》升级到 2026 年的《智能体规范应用与创新发展实施意见》，监管对象从「大模型」延伸至「智能体」。','智能体具备自主感知、规划任务、调用工具、执行操作的能力，风险面比单纯的内容生成更大，这也是监管必须提前卡位的原因。'],
+points:['规模：988 款服务备案、598 款应用登记','扩容：监管对象从大模型延伸到智能体','原则：包容审慎、分类分级'],
+tags:['备案','智能体','包容审慎','监管扩容']},
+
+{id:'p06',cat:'policy',date:'2026-10-08',source:'白宫 / Nextgov',region:'海外',
+title:'白宫承诺 24 亿美元算力与工具，投向科学计算联合体',
+summary:'白宫承诺向 Genesis Mission 联合体提供 24 亿美元工具与算力，来自 11 家企业（英伟达 10 亿、AMD 5 亿、OpenAI 2 亿），覆盖 15 个以上联邦机构。',
+body:['白宫 10 月 8 日发布的情况说明中，承诺向 Genesis Mission 联合体提供 24 亿美元的工具与算力额度。报道披露的承诺来自 11 家企业，其中英伟达 10 亿美元、AMD 5 亿美元、OpenAI 2 亿美元。','该计划覆盖超过 15 个联邦机构所面对的科学挑战，本质上是用补贴算力换科研成果。','对研究团队来说，这是通过联邦渠道获取低成本算力的窗口期；对厂商而言，则是把算力变成政策影响力的典型操作。'],
+points:['规模：24 亿美元工具与算力额度','来源：11 家企业，英伟达 10 亿 / AMD 5 亿 / OpenAI 2 亿','覆盖：15 个以上联邦机构的科学挑战'],
+tags:['白宫','算力补贴','科研','Genesis Mission']},
+
+{id:'p07',cat:'policy',date:'2026-06-01',source:'美国行政令',region:'海外',
+title:'美国 6 月出台《促进先进人工智能创新与安全》行政令',
+summary:'美国以行政令构建自愿框架，6 月出台《促进先进人工智能创新与安全》行政令，呈现「去监管化」与「安全回摆」的双重特征。',
+body:['美国选择以行政令构建自愿框架的治理路径。6 月出台的《促进先进人工智能创新与安全》行政令，被分析人士概括为同时呈现「去监管化」与「安全回摆」的双重特征。','与欧盟的全面立法不同，美国更依赖行政分支的灵活调整与企业自愿承诺，这让它能更快响应产业变化，但也带来规则不确定性。','美国、欧盟、中国、韩国、新加坡各自选择了不同路径，全球 AI 治理已形成明显的差异化格局。'],
+points:['路径：行政令 + 自愿框架','特征：去监管化与安全回摆并存','对比：不同于欧盟的风险分级强制立法'],
+tags:['美国','行政令','自愿框架','治理格局']},
+
+{id:'p08',cat:'policy',date:'2026-01-01',source:'新加坡 / 韩国官方',region:'海外',
+title:'新加坡推全球首个智能体治理示范框架，韩国基本法落地',
+summary:'新加坡 2026 年 1 月推出全球首个《智能体人工智能治理示范框架》，治理路径锚定自愿性框架与行业指引；韩国《人工智能发展与建立信任基本法》同期于 1 月实施。',
+body:['新加坡于 2026 年 1 月推出全球首个《智能体人工智能治理示范框架》，治理路径锚定于自愿性框架与行业指引，是首个专门针对「智能体」而非大模型的治理文件。','韩国《人工智能发展与建立信任基本法》也在 1 月实施，走的是顶层设计路线。','全球治理格局由此呈现清晰分野：欧盟全面立法、美国构建自愿框架、韩国顶层设计、新加坡柔性指引、中国包容普惠。'],
+points:['新加坡：全球首个智能体治理示范框架','韩国：AI 发展与信任基本法 1 月实施','格局：五方路径各异，差异化明显'],
+tags:['新加坡','韩国','智能体治理','国际比较']},
+
+{id:'p09',cat:'policy',date:'2026-01-01',source:'欧盟委员会',region:'海外',
+title:'欧盟《人工智能法案》落地：风险分级与能耗披露义务',
+summary:'欧盟以全面立法构建风险分级监管体系，《人工智能法案》明确数据透明与能耗披露义务，对高风险 AI 系统实施强制评估、文档留存与人机监督等约束。',
+body:['欧盟以全面立法构建风险分级监管体系。《人工智能法案》明确了数据透明与能耗披露义务，对高风险人工智能系统实施强制评估、文档留存、人机监督等约束措施。','能耗披露是欧盟方案里极具前瞻性的一条——把算力与碳排放纳入合规视野，直接回应了数据中心扩张带来的能源争议。','越南、新加坡等亚洲国家也通过立法形式建立 AI 治理框架，防范 AI 滥用带来的安全风险。'],
+points:['模式：风险分级 + 强制评估','亮点：数据透明与能耗披露义务','措施：文档留存、人机监督'],
+tags:['欧盟','风险分级','能耗披露','AI法案']},
+
+{id:'p10',cat:'policy',date:'2026-10-10',source:'经济日报',region:'国内',
+title:'智能体安全被列为重点：攻击面从服务器扩至模型与工具调用',
+summary:'评论指出 AI 驱动的网络攻击呈智能化、自动化、隐蔽化特点，攻击对象从服务器与网络边界拓展至大模型、智能体与核心数据，权限调用与工具执行环节成为新的风险突破口。',
+body:['伴随 AI 大规模商业化应用，AI 驱动的网络攻击安全风险日趋凸显。这类攻击具有智能化、自动化、隐蔽化特点，攻击对象从服务器、网络边界拓展至大模型、智能体与核心数据。','权限调用、工具执行等环节也成为风险突破口，防护难度显著增加。一旦安全失守，不仅单个企业受损，更可能动摇整个产业链的信任根基。','政策建议上，强调对政务、金融、公共安全等高风险领域严格落实备案、安全检测、问题召回制度；对休闲娱乐等低风险场景更多依托行业自律，避免「一刀切」束缚创新。'],
+points:['风险：攻击面扩至模型、智能体与工具调用','策略：高风险领域强制备案与召回，低风险靠自律','机制：建立 AI 供应链安全信息共享预警机制'],
+tags:['智能体安全','供应链','分类治理','网络安全']},
+
+{id:'p11',cat:'policy',date:'2026-04-01',source:'中央网信办',region:'国内',
+title:'「清朗·整治 AI 技术滥用」专项行动：处置违规 AI 产品 3500 余款',
+summary:'中央网信办部署为期 3 个月的「清朗·整治 AI 技术滥用」专项行动，第一阶段累计处置违规小程序、应用程序、智能体等 AI 产品 3500 余款，清理违法违规信息 96 万余条。',
+body:['2025 年 4 月，中央网信办部署开展为期 3 个月的「清朗·整治 AI 技术滥用」专项行动。第一阶段累计处置违规小程序、应用程序、智能体等 AI 产品 3500 余款，清理违法违规信息 96 万余条。','执法层面也在细化。北京某企业开发的 App 被查明在后台运行、用户未使用任何功能的情况下收集上传应用程序安装卸载信息；用户使用上传 AI 头像功能时调用非必要存储权限。网信部门认定其超出最小必要范围，依法责令改正、给予警告并处罚款。','最小必要原则正在成为个人信息保护执法的具体抓手，AI 功能不再是可以绕过合规的理由。'],
+points:['成果：处置违规 AI 产品 3500 余款，清理信息 96 万余条','执法：超出最小必要范围被警告并罚款','原则：知情同意与最小必要'],
+tags:['清朗行动','最小必要','个人信息','执法案例']},
+
+{id:'p12',cat:'policy',date:'2026-10-01',source:'中国社科院',region:'国内',
+title:'《人工智能法示范法 1.0（专家建议稿）》发布，建议负面清单管理',
+summary:'中国社会科学院国情调研重大项目起草组发布《人工智能法示范法 1.0（专家建议稿）》，建议采用负面清单管理制度进行风险管理，并创设性提出设置国家人工智能主管机关。',
+body:['中国社会科学院国情调研重大项目起草组于 2026 年发布《人工智能法示范法 1.0（专家建议稿）》。建议稿建议采用负面清单管理制度对人工智能进行风险管理，明确了研发者、提供者的义务，并创设性提出设置国家人工智能主管机关。','专家期待即将出台的人工智能法以此为「纲」，确立风险分级、算法透明、合规审计等基础性制度；以个人信息保护法、网络安全法、数据安全法为「目」，针对生成式 AI、智能体等具体场景细化配套规则。','在规范调适层面，应推动信息匿名化标准从绝对走向相对，厘定公开个人信息合理利用边界，实行知情同意分层分类处理。'],
+points:['制度：负面清单管理 + 风险分级 + 算法透明','机构：建议设立国家人工智能主管机关','配套：与个人信息保护法等形成纲目结构'],
+tags:['人工智能法','示范法','负面清单','专家建议稿']},
+
+/* ---------- 行业动态 ---------- */
+{id:'i01',cat:'industry',date:'2026-10-13',source:'《财经》/ 彭博社',region:'国内',
+title:'DeepSeek 新一轮融资增至约千亿元，估值约 5000 亿元',
+summary:'DeepSeek 新一轮融资拟从 500 亿增至约 1000 亿元，投前估值约 5000 亿元，新进方含石溪、中芯聚源、CPE 源峰、吉利，宁德时代拟增资 100 亿。',
+body:['据《财经》10 月 13 日报道，DeepSeek 最新一轮融资拟从此前计划的 500 亿元增至约 1000 亿元，投前估值仍为约 5000 亿元。新进投资方包括石溪资本、中芯聚源、CPE 源峰、君联资本、吉利等，宁德时代拟增资约 100 亿元。','此前首轮融资于今年 4 月启动、6 月底完成交割，规模约 510 亿元，投后估值接近 4000 亿元。若第二轮顺利落地，DeepSeek 将在半年内累计融资约 1500 亿元，有望成为今年国内一级市场规模最大的融资案例。','资金投向同样值得关注：公司同步在内蒙古建设大型数据中心，计划部署至少 16 万枚华为高端 AI 加速芯片。上述信息尚未获 DeepSeek 官方确认。'],
+points:['规模：500 亿 → 约 1000 亿元，投前估值约 5000 亿','投资方：石溪、中芯聚源、CPE 源峰、君联、吉利，宁德时代拟增资 100 亿','算力：内蒙古数据中心，拟部署 16 万枚华为芯片'],
+tags:['DeepSeek','融资','数据中心','国产芯片']},
+
+{id:'i02',cat:'industry',date:'2026-10-13',source:'彭博社 / 福布斯',region:'国内',
+title:'具身智能持续升温：星尘智能融资 10 亿，DeepSeek 拟领投 Winverse AI',
+summary:'绳驱人形机器人公司星尘智能完成 10 亿元融资，投后估值 150 亿元；彭博社称 DeepSeek 已同意领投机器人 AI 初创公司 Winverse AI 数千万美元种子轮，投后估值约 4 亿美元。',
+body:['10 月 13 日，绳驱 AI 人形机器人公司星尘智能宣布完成 10 亿元规模新一轮融资，投后估值达 150 亿元，由投控东海领投。这是其近半年内完成的第四轮融资，三个月内估值再抬升 50 亿元。','10 月 12 日，据彭博社报道，DeepSeek 已同意领投机器人 AI 初创公司 Winverse AI 的数千万美元种子轮融资，投后估值预计约 4 亿美元。Winverse AI 由腾讯前杰出科学家胡瀚创立，美团旗下龙珠投资亦给出出资承诺。','值得关注的是资金结构变化：DeepSeek 此前通过宇树科技 IPO 战略配售属产业协同型入股，此次拟领投 Winverse AI 则偏向底层模型与基础设施。大模型公司以投资方式切入具身智能的「大脑」环节，或将成为下一阶段的趋势。'],
+points:['星尘智能：10 亿元融资，估值 150 亿元','Winverse AI：DeepSeek 拟领投种子轮，估值约 4 亿美元','趋势：大模型公司向具身智能底层延伸'],
+tags:['具身智能','人形机器人','星尘智能','Winverse']},
+
+{id:'i03',cat:'industry',date:'2026-10-13',source:'路透社 / 财经媒体',region:'海外',
+title:'OpenAI 洽谈百亿美元融资，估值有望达 1.4 万亿美元',
+summary:'OpenAI 新一轮融资洽谈引入包括 MGX 在内的阿联酋财团，讨论合计投资最高 100 亿美元，投前估值有望达约 1.4 万亿美元；软银 300 亿美元投资承诺已于 10 月初全部到位。',
+body:['OpenAI 新一轮融资洽谈引入包括 MGX 在内的阿联酋财团，讨论合计投资最高 100 亿美元，投前估值有望达到约 1.4 万亿美元。软银 300 亿美元的投资承诺已于 10 月初全部到位。','公司向投资者披露年化营收接近 500 亿美元——这一数字是支撑高估值的核心依据，也是市场对 AI 商业化速度最直接的观察窗口。','同期 Anthropic 寻求最早 11 月中旬启动 IPO，争取感恩节前挂牌。两大头部实验室在同一时间窗口争夺资本，反映 AI 一级市场的热度仍在延续。'],
+points:['融资：阿联酋财团洽谈最高 100 亿美元','估值：投前有望约 1.4 万亿美元','营收：年化接近 500 亿美元'],
+tags:['OpenAI','融资','估值','软银']},
+
+{id:'i04',cat:'industry',date:'2026-10-12',source:'云计算简报 / 路透社',region:'海外',
+title:'微软第三代自研 AI 芯片进入大规模部署，降低对英伟达依赖',
+summary:'微软自研 AI 硅片已推进到第三代，计划在数据中心大规模部署以降低对英伟达的依赖并显著压低大模型运行成本；英特尔与博通 CEO 同期警示算力扩张的电力与物理瓶颈。',
+body:['微软宣布自研 AI 硅片达到第三代里程碑，计划在其数据中心大规模部署，目标是降低对英伟达的依赖并显著压低运行大语言模型的运营成本。','同一周，英特尔与博通的高层公开提示 AI 产业的规模化瓶颈，包括电力约束，以及芯片制造逼近物理与经济极限后维持指数级性能提升的难度。','自研芯片与电力约束是一体两面：前者在压成本，后者在抬成本。谁能在两者之间找到平衡，谁就掌握了下一阶段的成本主动权。'],
+points:['微软：三代自研硅片，进入大规模部署','风险：电力约束与制程物理极限被高层点名','方向：以自研换成本主动权'],
+tags:['微软','自研芯片','算力成本','电力瓶颈']},
+
+{id:'i05',cat:'industry',date:'2026-10-14',source:'腾讯 / 财经媒体',region:'国内',
+title:'腾讯 WorkBuddy 与企业微信深度融合，十大能力可被调用',
+summary:'WorkBuddy 与企业微信于 10 月 14 日深度融合：可在授权内调用消息、文档、会议、微盘等十大能力，并以对话机器人身份进入企业通讯录。',
+body:['10 月 14 日，腾讯 WorkBuddy 与企业微信实现深度融合。WorkBuddy 客户端可在企业授权范围内调用消息、文档、会议、微盘等十大能力，并作为对话机器人进入企业微信通讯录，任务从下达到成果交付形成全自动闭环。','同日，豆包工作上线数据导入功能，支持把 ChatGPT、Claude Code、Trae Work 的对话、技能与记忆一键迁移，历史会话保留原有上下文。','智能体正在从对话窗口走向办公软件与操作系统。这一轮竞争的关键已从「模型有多强」转向「能调用多少真实工作流」。'],
+points:['融合：WorkBuddy 可调用企业微信十大能力','形态：以对话机器人身份进入企业通讯录','同日：豆包工作支持三方对话与记忆迁移'],
+tags:['腾讯','企业微信','智能体','办公场景']},
+
+{id:'i06',cat:'industry',date:'2026-10-10',source:'财经媒体',region:'海外',
+title:'腾讯被曝与甲骨文签最大海外租赁协议，涉 10 万块 AI 芯片',
+summary:'腾讯被曝与甲骨文签署最大海外租赁协议，在东南亚获取约 10 万块先进 AI 芯片，交易估值约 70 亿美元、为期五年；SpaceX 计划募资 400 亿美元采购英伟达芯片。',
+body:['腾讯被曝与甲骨文签署其最大的海外租赁协议，在东南亚获取约 10 万块先进 AI 芯片，交易估值约 70 亿美元、为期五年。','同期，SpaceX 计划募资 400 亿美元采购英伟达芯片，拟通过约 100 亿美元银行贷款加 300 亿美元投资级债券的组合融资。','算力租赁正在成为一门独立的重资本生意：一边是稀缺的 GPU 供给，一边是愿意为确定性付溢价的买家，中间是越来越复杂的融资结构。'],
+points:['腾讯：东南亚约 10 万块芯片，约 70 亿美元 / 五年','SpaceX：拟募资 400 亿美元采购英伟达芯片','结构：银行贷款 + 投资级债券组合融资'],
+tags:['算力租赁','甲骨文','SpaceX','GPU']},
+
+{id:'i07',cat:'industry',date:'2026-10-11',source:'华为 / IDC',region:'国内',
+title:'华为披露昇腾 950 超节点，称中国市场份额已超英伟达',
+summary:'华为披露昇腾 950 超节点详情，徐直军表示依据 IDC 数据昇腾在中国市场份额已超过英伟达；英伟达 Vera Rubin NVL72 投产实测 token 吞吐提升 4.8 倍。',
+body:['华为披露昇腾 950 超节点的相关访谈详情。华为徐直军表示，依据 IDC 数据，昇腾在中国市场的份额已超过英伟达。','另一边，英伟达 Vera Rubin NVL72 投产实测，token 吞吐提升 4.8 倍，并与 CoreWeave 合作在云端上线。','国产算力与英伟达的差距正在从「能不能用」转向「性价比与生态」。份额数据的反转如果成立，将是国内 AI 基础设施最具标志性的变化之一。'],
+points:['华为：昇腾 950 超节点，IDC 数据显示国内份额领先','英伟达：Vera Rubin NVL72 吞吐提升 4.8 倍','格局：竞争焦点转向性价比与生态'],
+tags:['华为昇腾','英伟达','超节点','国产算力']},
+
+{id:'i08',cat:'industry',date:'2026-10-10',source:'电力与数据中心报道',region:'海外',
+title:'电力成为数据中心新瓶颈：亚马逊签 20 年核电，谷歌签 3.59GW 大单',
+summary:'亚马逊签署 20 年核电供应协议为 AI 数据中心供电，谷歌签下 Constellation 3.59 吉瓦电力大单；芬兰已吸引超 670 亿欧元数据中心投资，同时叫停谷歌两座数据中心建设。',
+body:['电力与选址成为数据中心的新瓶颈。亚马逊签署 20 年核电供应协议为 AI 数据中心供电；谷歌签下 Constellation 3.59 吉瓦电力大单。','区域竞争同步加剧：芬兰已吸引超 670 亿欧元数据中心投资，但芬兰方面同时叫停了谷歌两座数据中心的建设；日本最大单一数据中心落地千叶，设计容量 400MW；韩国 KT Cloud 宣布建设青罗 50 兆瓦 AI 数据中心。','戴尔、Jera 与英国 Rhaelm 合作在东京附近建设 150 亿美元、400MW 的离网 AI 数据中心和燃气发电厂，预计 2028 年运营——「自带电厂」正在成为大型算力园区的标准配置。'],
+points:['亚马逊：20 年核电供应协议','谷歌：Constellation 3.59 GW 电力大单','选址：芬兰 670 亿欧元投资，日本千叶 400MW'],
+tags:['数据中心','电力','核电','选址']},
+
+{id:'i09',cat:'industry',date:'2026-10-11',source:'创投周报',region:'海外',
+title:'一周创投：TypeSafe AI 融 8.7 亿，Manus 母公司超 5 亿美元',
+summary:'本周创投：TypeSafe AI 融 8.7 亿美元（估值 75 亿）、Manus 母公司超 5 亿美元、Oxide 4.45 亿美元 D 轮，重心从基础模型转向执行层。',
+body:['本周披露的创投交易显示资金正从基础模型向基础设施与执行层扩散：TypeSafe AI 完成 8.7 亿美元 A 轮，估值 75 亿美元，用于扩展可直接向软件系统返回结构化决策的 Jev 模型。','Manus 母公司蝴蝶效应在 Meta 收购终止后完成超 5 亿美元新融资，投资方包括博裕资本、IDG 资本、腾讯、红杉中国与真格基金；Oxide Computer 完成 4.45 亿美元 D 轮，扩大其软硬件一体云计算系统产能。','趋势判断很明确：AI 正从「内容生成」走向「任务执行」。投资机会延伸到可靠性、企业集成、客户留存与可度量的生产力提升，而不再只是模型跑分。'],
+points:['TypeSafe AI：8.7 亿美元 A 轮，估值 75 亿美元','Manus：蝴蝶效应超 5 亿美元新融资','趋势：从内容生成转向任务执行'],
+tags:['创投','Manus','基础设施','任务执行']},
+
+{id:'i10',cat:'industry',date:'2026-10-13',source:'CloudIntelligence Brief',region:'海外',
+title:'IMF 上调 2026 全球增长预期至 3.1%，称 AI 投资为主要驱动',
+summary:'国际货币基金组织将 2026 年全球经济增长预期上调至 3.1%，明确指出大规模 AI 投资是主要驱动因素，抵消了地缘冲突与国债压力带来的逆风；英国增长预期也因 AI 应用获上调。',
+body:['国际货币基金组织将 2026 年全球经济增长预期上调至 3.1%，并明确把大规模人工智能投资列为主要驱动因素，认为其抵消了地缘政治冲突与国家债务带来的逆风。','IMF 同时上调了英国的经济前景，指出该国服务业与金融业对 AI 技术的快速采用是好于预期表现的主要引擎。','另一面是就业的警报：世界银行就业委员会呼吁各国实施「危机级别」的就业支持措施，警告 AI 的快速普及可能造成劳动力市场的「海啸」，岗位被替代的速度快于新岗位创造的速度。'],
+points:['IMF：2026 全球增长预期上调至 3.1%','驱动：AI 投资抵消地缘与债务逆风','风险：世界银行警告就业市场「海啸」'],
+tags:['IMF','宏观经济','就业','AI投资']},
+
+{id:'i11',cat:'industry',date:'2026-10-13',source:'CloudIntelligence Brief',region:'海外',
+title:'法律 AI 公司 Harvey 融资 5.5 亿美元，估值 155 亿美元',
+summary:'法律科技初创公司 Harvey 获得 5.5 亿美元新融资，估值达 155 亿美元；同期 Omron 以 6.75 亿美元收购 OnLogic，印度 Sarvam AI 洽谈 3 亿美元融资。',
+body:['法律 AI 初创公司 Harvey 获得 5.5 亿美元新融资，估值达到 155 亿美元，凸显投资者对可自动化复杂专业服务工作流的企业级 AI 应用的强烈兴趣。','产业侧同样活跃：日本欧姆龙以 6.75 亿美元收购美国 OnLogic，目标是把先进 AI 集成进实体制造环境，打通数字智能与工厂硬件之间的断层；印度 Sarvam AI 正在洽谈 3 亿美元追加融资，估值有望翻倍至 30 亿美元。','垂直行业的 AI 应用正在成为最抗跌的一层：它们不依赖通用模型的能力跃迁，而是靠工作流理解与合规积累建立壁垒。'],
+points:['Harvey：5.5 亿美元融资，估值 155 亿美元','欧姆龙：6.75 亿美元收购 OnLogic，进军物理 AI','Sarvam AI：洽谈 3 亿美元，估值或翻倍'],
+tags:['Harvey','法律AI','并购','垂直应用']},
+
+{id:'i12',cat:'industry',date:'2026-10-13',source:'Anthropic',region:'海外',
+title:'Anthropic 推出防护措施，应对模型蒸馏攻击风险',
+summary:'Anthropic 开发了新的技术防护措施，用于防范「蒸馏攻击」——即用大模型输出训练小模型，从而绕过安全协议或窃取前沿系统知识产权的行为。',
+body:['Anthropic 宣布开发了新技术防护措施，用于防范「蒸馏攻击」。这类攻击指的是用大模型的输出去训练更小的模型，以此绕过安全协议或窃取前沿系统的知识产权。','蒸馏一直是开源与闭源阵营之间的灰色地带：它是降低成本的正当手段，也可能成为能力套利的工具。防护措施的引入意味着这条边界正在被明确划线。','同期 Alphabet 总裁 Ruth Porat 分享了谷歌如何安排资本开支以在 AI 格局中长期占优，并回应了当前千亿美元级投资周期所伴随的显著风险。'],
+points:['威胁：用大模型输出训练小模型以绕过安全协议','应对：Anthropic 上线针对性技术防护','背景：千亿美元投资周期下的风险讨论升温'],
+tags:['Anthropic','蒸馏攻击','安全防护','知识产权']},
+
+{id:'i13',cat:'industry',date:'2026-10-14',source:'财经媒体',region:'海外',
+title:'亚马逊洽谈约 70 亿美元收购世界模型公司 Decart',
+summary:'亚马逊正洽谈以约 70 亿美元收购世界模型初创公司 Decart；同期 Manus 母公司完成超 5 亿美元融资，Nous Research 完成 9000 万美元 B 轮，投后估值 15 亿美元。',
+body:['亚马逊正洽谈以约 70 亿美元收购世界模型初创公司 Decart。世界模型被视为通向具身智能与通用推理的关键路径，云厂商对此类资产的争夺正在加剧。','智能体侧的融资同样密集：开源智能体 Hermes 的开发方 Nous Research 完成 9000 万美元 B 轮，投后估值 15 亿美元；Manus 母公司蝴蝶效应完成超 5 亿美元新一轮融资。','FieldAI 为机器人开发通用型大脑，融资 7 亿美元、估值 100 亿美元；General Intuition 通过游戏视频训练智能体的空间推理，融资 2.2 亿美元。资本正在为「让 AI 理解物理世界」这条路线集中下注。'],
+points:['亚马逊：洽谈约 70 亿美元收购 Decart','Nous Research：9000 万美元 B 轮，估值 15 亿美元','FieldAI：7 亿美元融资，估值 100 亿美元'],
+tags:['亚马逊','世界模型','Decart','具身智能']},
+
+{id:'i14',cat:'industry',date:'2026-10-10',source:'每日 AIGC 早报',region:'海外',
+title:'AI 基础设施融资爆发：高盛称今年已向 AI 财团提供约 5000 亿美元',
+summary:'高盛数据显示今年至今投资者已向 AI 财团提供约 5000 亿美元融资，云服务商债务发行扩展至欧元、加元等市场；GPU 云服务商 GMI Cloud 筹集 6.68 亿美元。',
+body:['高盛数据显示，今年至今投资者已向 AI 财团提供约 5000 亿美元融资，云服务商的债务发行市场已扩展至欧元、加元等币种。','具体交易上：GPU 云服务商 GMI Cloud 筹集 6.68 亿美元，含英伟达参与的 2.23 亿美元股权融资及台湾中国信托商业银行领投的 4.45 亿美元信贷融资；AI 网络安全智能体公司 Armadin 完成 2.5 亿美元 B 轮。','AI 基础设施与云服务公司 Firmus 计划将约 50% 的 IPO 股份分配给现有持有人，因投资者需求远超发行规模，成为澳大利亚规模最大的 IPO 之一。'],
+points:['规模：年内 AI 财团融资约 5000 亿美元','案例：GMI Cloud 6.68 亿、Armadin 2.5 亿美元','信号：Firmus IPO 需求超发，认购火爆'],
+tags:['AI基础设施','融资','云计算','IPO']}
+];
+
+/* ===================== 工具 ===================== */
+const CAT_NAME = {model:'最新模型', policy:'AI 政策', industry:'行业新闻'};
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), 1900);
+}
+function applyTheme(t){
+  const theme = (t === 'tech') ? 'tech' : 'ink';
+  document.body.dataset.theme = theme;
+  $('#themeLabel').textContent = theme === 'tech' ? '切换：手绘风' : '切换：科技风';
+  state.theme = theme;
+}
+function todayKey(d){
+  const x = d || new Date();
+  return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
+}
+function hashSeed(str){
+  let h = 2166136261;
+  for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function seededShuffle(arr, seed){
+  const a = arr.slice(); let s = seed >>> 0;
+  for(let i=a.length-1;i>0;i--){
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    const j = s % (i+1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function cnDate(key){
+  const [y,m,d] = key.split('-').map(Number);
+  const w = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+  const dt = new Date(y, m-1, d);
+  return {main: y+'年'+m+'月'+d+'日', week: w[dt.getDay()]};
+}
+function genFeed(dateKey, offset){
+  const seed = hashSeed(dateKey + '#' + (offset||0));
+  const shuffled = seededShuffle(POOL, seed);
+  const picked = [];
+  const quota = {model:3, policy:3, industry:3};
+  for(const it of shuffled){
+    if(picked.length >= 9) break;
+    if(quota[it.cat] > 0){ picked.push(it.id); quota[it.cat]--; }
+  }
+  for(const it of shuffled){
+    if(picked.length >= 9) break;
+    if(!picked.includes(it.id)) picked.push(it.id);
+  }
+  // 按分类排序：模型 → 政策 → 行业，视觉上更整齐
+  const order = {model:0, policy:1, industry:2};
+  picked.sort((a,b)=>{
+    const A = POOL.find(x=>x.id===a), B = POOL.find(x=>x.id===b);
+    return order[A.cat]-order[B.cat] || B.date.localeCompare(A.date);
+  });
+  return picked;
+}
+
+/* ===================== 状态 ===================== */
+const LS_KEY = 'ai_daily_v1';
+let state = {
+  archive: {},     // { '2026-10-15': ['m01', ...] }
+  deleted: [],     // 被删除的条目 id
+  read: [],        // 已读 id
+  offset: {},      // { dateKey: n } 换一批次数
+  lastDate: '',
+  theme: 'ink'     // ink=手绘暖风 / tech=科技冷风
+};
+function load(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){ const o = JSON.parse(raw); state = Object.assign(state, o); }
+  }catch(e){ console.warn('读取本地记录失败', e); }
+}
+function save(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+  catch(e){ toast('本地存储写入失败，记录可能无法保留'); }
+}
+function ensureToday(){
+  const k = todayKey();
+  const fresh = !state.archive[k];
+  if(fresh){ state.archive[k] = genFeed(k, 0); state.offset[k] = 0; }
+  if(state.lastDate !== k){ state.lastDate = k; }
+  save();
+  return {key:k, fresh};
+}
+
+let curDate = '', curFilter = 'all', curSearch = '', focusId = '';
+
+/* ===================== 渲染 ===================== */
+function visibleIds(){
+  let ids = (state.archive[curDate] || []).filter(id => !state.deleted.includes(id));
+  if(curFilter !== 'all'){
+    ids = ids.filter(id => (POOL.find(x=>x.id===id)||{}).cat === curFilter);
+  }
+  if(curSearch.trim()){
+    const q = curSearch.trim().toLowerCase();
+    ids = ids.filter(id=>{
+      const it = POOL.find(x=>x.id===id); if(!it) return false;
+      return (it.title+it.summary+it.tags.join('')+it.source).toLowerCase().includes(q);
+    });
+  }
+  return ids;
+}
+function allTodayIds(){
+  return (state.archive[curDate] || []).filter(id => !state.deleted.includes(id));
+}
+
+function renderStats(){
+  const ids = allTodayIds();
+  const c = {model:0, policy:0, industry:0};
+  ids.forEach(id=>{ const it = POOL.find(x=>x.id===id); if(it) c[it.cat]++; });
+  $('#cModel').textContent = c.model;
+  $('#cPolicy').textContent = c.policy;
+  $('#cIndustry').textContent = c.industry;
+  $('#cTotal').textContent = ids.length;
+  $('#fAll').textContent = ids.length;
+  $('#fModel').textContent = c.model;
+  $('#fPolicy').textContent = c.policy;
+  $('#fIndustry').textContent = c.industry;
+  $('#poolSize').textContent = POOL.length;
+  const d = cnDate(curDate);
+  $('#dateMain').textContent = d.main;
+  $('#dateSub').textContent = d.week + ' · 简报已生成';
+  $('#feedCount').textContent = '今日 ' + ids.length + ' 条（另有 ' + state.deleted.length + ' 条已删除）';
+  const isToday = curDate === todayKey();
+  $('#feedTitle').textContent = isToday ? '今日资讯' : (curDate.slice(5).replace('-','月') + '日 归档');
+  $('#overviewTag').textContent = isToday ? '今天' : '往期';
+  $('#snapCount').textContent = ids.length + ' 条';
+}
+
+function renderCards(){
+  const ids = visibleIds();
+  const box = $('#cards');
+  box.innerHTML = '';
+  $('#noResult').style.display = ids.length ? 'none' : 'block';
+  ids.forEach(id=>{
+    const it = POOL.find(x=>x.id===id); if(!it) return;
+    const el = document.createElement('article');
+    el.className = 'card cat-' + it.cat + (state.read.includes(id) ? ' read' : '');
+    el.dataset.id = id;
+    const lead = it.body[0].length > 108 ? it.body[0].slice(0,108) + '…' : it.body[0];
+    el.innerHTML =
+      '<span class="strip"></span>' +
+      '<div class="meta">' +
+        '<span class="pill ' + it.cat + '">' + CAT_NAME[it.cat] + '</span>' +
+        '<span>' + it.date + '</span><span class="dot"></span>' +
+        '<span>' + it.region + '</span>' +
+      '</div>' +
+      '<h2>' + it.title + '</h2>' +
+      '<p class="lead">' + lead + '</p>' +
+      '<div class="tags">' + it.tags.map(t=>'<span>#' + t + '</span>').join('') + '</div>' +
+      '<div class="ops">' +
+        '<button class="btn small" data-act="open">查看详情</button>' +
+        '<button class="icon-btn" data-act="read">' + (state.read.includes(id) ? '标为未读' : '标为已读') + '</button>' +
+        '<button class="icon-btn del" data-act="del">删除记录</button>' +
+        '<span class="src">来源：' + it.source + '</span>' +
+      '</div>';
+    box.appendChild(el);
+  });
+  observeCards();
+}
+
+function renderSnaps(){
+  const ids = allTodayIds();
+  const box = $('#snapList');
+  box.innerHTML = '';
+  ids.forEach(id=>{
+    const it = POOL.find(x=>x.id===id); if(!it) return;
+    const el = document.createElement('div');
+    el.className = 'snap' + (id === focusId ? ' on' : '');
+    el.dataset.id = id;
+    el.innerHTML =
+      '<div class="sn-top"><span class="pill ' + it.cat + '" style="font-size:10px;padding:0 7px">' + CAT_NAME[it.cat] + '</span>' +
+      '<span class="wc">' + [...it.summary].length + ' 字</span></div>' +
+      '<h4 class="sn-t">' + it.title + '</h4>' +
+      '<p class="sn-s">' + it.summary + '</p>';
+    el.addEventListener('click', ()=>{
+      const card = document.querySelector('.card[data-id="' + id + '"]');
+      if(card){ card.scrollIntoView({behavior:'smooth', block:'center'}); setFocus(id); flash(card); }
+      else openDetail(id);
+    });
+    box.appendChild(el);
+  });
+  renderKeywords(ids);
+}
+
+function renderKeywords(ids){
+  const map = {};
+  ids.forEach(id=>{
+    const it = POOL.find(x=>x.id===id); if(!it) return;
+    it.tags.forEach(t=>{ map[t] = (map[t]||0) + 1; });
+  });
+  const arr = Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,14);
+  $('#kwList').innerHTML = arr.map(([t,n],i)=>
+    '<span class="' + (n>1 ? 'hot' : '') + '">#' + t + '</span>'
+  ).join('') || '<span>暂无</span>';
+}
+
+function setFocus(id){
+  focusId = id;
+  const it = POOL.find(x=>x.id===id);
+  if(!it) return;
+  $('#fcCat').innerHTML = '<span class="pill ' + it.cat + '">' + CAT_NAME[it.cat] + '</span> <span class="wc">' + [...it.summary].length + ' 字速览</span>';
+  $('#fcTitle').textContent = it.title;
+  $('#fcSum').textContent = it.summary;
+  $$('.snap').forEach(s=>s.classList.toggle('on', s.dataset.id === id));
+  $$('.card').forEach(c=>c.classList.toggle('focus', c.dataset.id === id));
+}
+function flash(el){
+  el.animate([{boxShadow:'0 0 0 0 rgba(217,151,59,.9)'},{boxShadow:'0 0 0 14px rgba(217,151,59,0)'}], {duration:700, easing:'ease-out'});
+}
+
+let observer = null;
+function observeCards(){
+  if(observer) observer.disconnect();
+  observer = new IntersectionObserver(entries=>{
+    const vis = entries.filter(e=>e.isIntersecting)
+      .sort((a,b)=>a.boundingClientRect.top - b.boundingClientRect.top);
+    if(vis.length){ setFocus(vis[0].target.dataset.id); }
+  }, {rootMargin:'-12% 0px -55% 0px', threshold:0});
+  $$('.card').forEach(c=>observer.observe(c));
+}
+
+function renderArchive(){
+  const keys = Object.keys(state.archive).sort().reverse();
+  $('#archCount').textContent = keys.length + ' 天';
+  const box = $('#archList');
+  box.innerHTML = '';
+  const total = keys.reduce((n,k)=>n + state.archive[k].filter(id=>!state.deleted.includes(id)).length, 0);
+  keys.forEach(k=>{
+    const n = state.archive[k].filter(id=>!state.deleted.includes(id)).length;
+    const el = document.createElement('div');
+    el.className = 'arch-item' + (k === curDate ? ' on' : '');
+    el.innerHTML = '<span class="ad">' + k.slice(5).replace('-','/') + '</span>' +
+      '<span class="an">' + n + ' 条</span>' +
+      '<span class="del" title="删除这一天的记录">×</span>';
+    el.addEventListener('click', e=>{
+      if(e.target.classList.contains('del')){
+        if(confirm('删除 ' + k + ' 这一天的全部归档记录？')){
+          delete state.archive[k];
+          delete state.offset[k];
+          if(curDate === k) curDate = todayKey();
+          save(); renderAll(); toast('已删除 ' + k + ' 的归档');
+        }
+        return;
+      }
+      curDate = k; renderAll();
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+    box.appendChild(el);
+  });
+  if(!keys.length) box.innerHTML = '<div class="empty">还没有归档记录。</div>';
+  $('#trashN').textContent = state.deleted.length;
+  renderTrash();
+}
+
+function renderTrash(){
+  const box = $('#trashList');
+  box.innerHTML = '';
+  if(!state.deleted.length){ box.innerHTML = '<div class="empty">没有已删除的记录。</div>'; return; }
+  state.deleted.forEach(id=>{
+    const it = POOL.find(x=>x.id===id); if(!it) return;
+    const el = document.createElement('div');
+    el.className = 'trash-row';
+    el.innerHTML = '<span class="t">' + it.title.slice(0,22) + (it.title.length>22?'…':'') + '</span>' +
+      '<button data-restore="' + id + '">恢复</button>' +
+      '<button class="purge" data-purge="' + id + '">彻底删除</button>';
+    box.appendChild(el);
+  });
+  box.querySelectorAll('[data-restore]').forEach(b=>b.addEventListener('click', ()=>{
+    const id = b.dataset.restore;
+    state.deleted = state.deleted.filter(x=>x!==id); save(); renderAll(); toast('已恢复该条记录');
+  }));
+  box.querySelectorAll('[data-purge]').forEach(b=>b.addEventListener('click', ()=>{
+    const id = b.dataset.purge;
+    state.deleted = state.deleted.filter(x=>x!==id);
+    Object.keys(state.archive).forEach(k=>{
+      state.archive[k] = state.archive[k].filter(x=>x!==id);
+    });
+    save(); renderAll(); toast('已彻底删除');
+  }));
+}
+
+function renderAll(){
+  ensureToday();
+  if(!state.archive[curDate]) curDate = todayKey();
+  renderStats(); renderCards(); renderSnaps(); renderArchive();
+  if(!focusId && visibleIds().length) setFocus(visibleIds()[0]);
+}
+
+/* ===================== 详情 ===================== */
+function openDetail(id){
+  const it = POOL.find(x=>x.id===id); if(!it) return;
+  if(!state.read.includes(id)){ state.read.push(id); save(); }
+  setFocus(id);
+  const inner = $('#detailInner');
+  inner.innerHTML =
+    '<button class="close-x" id="closeX">×</button>' +
+    '<div class="d-meta">' +
+      '<span class="pill ' + it.cat + '">' + CAT_NAME[it.cat] + '</span>' +
+      '<span>' + it.date + '</span><span class="dot"></span><span>' + it.region + '</span>' +
+    '</div>' +
+    '<h2 class="d-title">' + it.title + '</h2>' +
+    '<div class="d-sumbox"><div class="lab">速 览 · ' + [...it.summary].length + ' 字</div><p>' + it.summary + '</p></div>' +
+    '<div class="d-body">' + it.body.map(p=>'<p>' + p + '</p>').join('') + '</div>' +
+    '<div class="d-points"><div class="lab">三个关键点</div><ul>' +
+      it.points.map(p=>'<li>' + p + '</li>').join('') +
+    '</ul></div>' +
+    '<div class="tags" style="margin-bottom:10px;">' + it.tags.map(t=>'<span>#' + t + '</span>').join('') + '</div>' +
+    '<div class="d-foot">' +
+      '<button class="btn small" id="dRead">' + (state.read.includes(id)?'标为未读':'标为已读') + '</button>' +
+      '<button class="btn small danger" id="dDel">删除这条记录</button>' +
+      '<span class="srcnote">来源：' + it.source + ' · 本条为资讯库摘录整理</span>' +
+    '</div>';
+  $('#detail').classList.add('open');
+  $('#mask').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  $('#detail').scrollTop = 0;
+  $('#closeX').onclick = closeDetail;
+  $('#dDel').onclick = ()=>{
+    if(!state.deleted.includes(id)) state.deleted.push(id);
+    save(); closeDetail(); renderAll(); toast('已删除，可在左栏「已删除」中恢复');
+  };
+  $('#dRead').onclick = ()=>{
+    if(state.read.includes(id)) state.read = state.read.filter(x=>x!==id);
+    else state.read.push(id);
+    save(); closeDetail(); renderAll();
+  };
+}
+function closeDetail(){
+  $('#detail').classList.remove('open');
+  $('#mask').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ===================== 事件 ===================== */
+$('#cards').addEventListener('click', e=>{
+  const card = e.target.closest('.card'); if(!card) return;
+  const id = card.dataset.id;
+  const btn = e.target.closest('[data-act]');
+  if(btn){
+    const act = btn.dataset.act;
+    if(act === 'open'){ openDetail(id); return; }
+    if(act === 'read'){
+      if(state.read.includes(id)) state.read = state.read.filter(x=>x!==id);
+      else state.read.push(id);
+      save(); renderCards(); renderSnaps(); toast(state.read.includes(id)?'已标记为已读':'已标记为未读');
+      return;
+    }
+    if(act === 'del'){
+      if(!state.deleted.includes(id)) state.deleted.push(id);
+      save(); renderAll(); toast('已删除该条记录');
+      return;
+    }
+  }
+  openDetail(id);
+});
+$('#mask').addEventListener('click', closeDetail);
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape') closeDetail(); });
+
+$('#filters').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-cat]'); if(!b) return;
+  $$('#filters button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); curFilter = b.dataset.cat; renderCards();
+});
+$('#search').addEventListener('input', e=>{ curSearch = e.target.value; renderCards(); });
+
+$('#btnRefresh').addEventListener('click', ()=>{
+  const k = todayKey();
+  const cur = state.archive[k] || [];
+  const seed = hashSeed(k + '#' + (state.offset[k]||0) + '#new');
+  const extra = seededShuffle(POOL.filter(x=>!cur.includes(x.id)), seed).slice(0, 3).map(x=>x.id);
+  state.archive[k] = cur.concat(extra);
+  curDate = k; save(); renderAll();
+  toast(extra.length ? ('今日新增 ' + extra.length + ' 条资讯') : '今日资讯已是最新');
+});
+$('#btnShuffle').addEventListener('click', ()=>{
+  const k = todayKey();
+  state.offset[k] = (state.offset[k]||0) + 1;
+  state.archive[k] = genFeed(k, state.offset[k]);
+  curDate = k; save(); renderAll(); toast('已换一批今日资讯');
+});
+$('#btnMarkAll').addEventListener('click', ()=>{
+  allTodayIds().forEach(id=>{ if(!state.read.includes(id)) state.read.push(id); });
+  save(); renderCards(); toast('今日全部标记为已读');
+});
+$('#btnClear').addEventListener('click', ()=>{
+  if(confirm('确定清空全部归档记录？该操作不可撤销。')){
+    state.archive = {}; state.offset = {}; curDate = todayKey();
+    save(); renderAll(); toast('已清空归档');
+  }
+});
+$('#btnTheme').addEventListener('click', ()=>{
+  const next = document.body.dataset.theme === 'tech' ? 'ink' : 'tech';
+  applyTheme(next); save();
+  toast(next === 'tech' ? '已切换：科技简约风' : '已切换：手绘暖风');
+});
+$('#trashHead').addEventListener('click', ()=>{ $('#trashBody').classList.toggle('open'); });
+$('#btnRestore').addEventListener('click', ()=>{
+  state.deleted = []; save(); renderAll(); toast('已恢复全部删除记录');
+});
+$('#btnPurge').addEventListener('click', ()=>{
+  if(confirm('彻底删除这些记录？删除后将无法恢复。')){
+    const ids = state.deleted.slice();
+    Object.keys(state.archive).forEach(k=>{ state.archive[k] = state.archive[k].filter(x=>!ids.includes(x)); });
+    state.deleted = []; save(); renderAll(); toast('已彻底清空');
+  }
+});
+
+/* ===================== 启动 ===================== */
+const LOGO_URL = 'data:image/webp;base64,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'; /* 内嵌去底机器人 logo（WebP/PNG data URI） */
+(function initLogo(){
+  try{
+    $('#logoBadge').innerHTML = '<img alt="AI 每日资讯" src="' + LOGO_URL + '">';
+    const link = document.createElement('link');
+    link.rel = 'icon';
+    link.href = LOGO_URL;
+    document.head.appendChild(link);
+  }catch(e){ console.warn('logo 注入失败', e); }
+})();
+load();
+applyTheme(state.theme);
+const boot = ensureToday();
+curDate = boot.key;
+if(!state.archive[curDate]) curDate = todayKey();
+renderAll();
+if(boot.fresh) setTimeout(()=>toast('已为你生成今日 AI 简报'), 500);
+</script>
+</body>
+</html>
